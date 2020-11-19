@@ -2,26 +2,25 @@ import os
 
 from flask import Flask
 from flask_restful import Api
+from pymongo import MongoClient
+from backend.config import MONGO_USER, MONGO_PASS
 
 # create and configure flask app
-app = Flask(__name__, instance_relative_config=True)
+app = Flask(__name__)
 
-app.config.from_mapping(
-    SECRET_KEY='dev'
-)
-
-# load instance configuration
-app.config.from_pyfile('config.py', silent=True)
-
-try:
-    os.makedirs(app.instance_path)
-except OSError:
-    pass
+MONGO_DB_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASS}@cluster0.vdjw7.mongodb.net/"
+mongo = MongoClient(MONGO_DB_URI)
 
 # import resources
 from backend.resources.ApiResource import *
 
 api = Api(app)
-api.add_resource(ApiBaseResource, '/api', '/api/')
-api.add_resource(ApiBuidlingResource, '/api/<building>', '/api/<building>/all')
-api.add_resource(ApiEndpointResource, '/api/<building>/<endpoint>', '/api/<building>/<endpoint>/')
+api.add_resource(ApiBaseResource, '/api', 
+                                  '/api/')
+
+api.add_resource(ApiBuildingResource, '/api/<building>',
+                                      '/api/<building>/all')
+                                      
+api.add_resource(ApiEndpointResource, '/api/<building>/<endpoint>', 
+                                      '/api/<building>/<endpoint>/', 
+                                      '/api/update')
