@@ -69,28 +69,9 @@ You can leave the virtual environment by running in your CLI:
 deactivate
 ```
 
-3. Once you have installed the required modules, the application is ready to be run. Export the flask app for the application:
+3. Once you have installed the required modules, the application is ready to be installed 
 
-### For Windows CMD:
+### To start the server
 ```
-set FLASK_APP=pci-backend
-set FLASK_ENV=development
-
-flask run
-```
-
-### For Windows PowerShell
-```
-$env:FLASK_APP="pci-backend"
-$env:FLASK_ENV="development"
-
-flask run
-```
-
-### For Linux and Mac:
-```
-export FLASK_APP=pci-backend
-export FLASK_ENV=development
-
-flask run
+python start-backend.py
 ```
