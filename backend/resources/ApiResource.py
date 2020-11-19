@@ -12,10 +12,10 @@ class ApiBaseResource(Resource):
 
 class ApiBuildingResource(Resource):
     def get(self, building):
-        return {'data': {'building': f"{building}"}}
+        pass
 
 class ApiEndpointResource(Resource):
-    def get(self, building, endpoint, entries=10):
+    def get(self, building, endpoint, entries):
         pass
     
     def post(self):
