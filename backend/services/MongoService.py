@@ -47,12 +47,14 @@ class MongoService():
 
         try:
 
+            room_entries = []
+
             # grab the database
             database_object = self.mongo[building]
 
             collection_object = database_object[room]
 
-            room_entries = [entry for entry in collection_object.find()]
+            room_entries = room_entries + [entry for entry in collection_object.find()]
 
             json_response = {
                 "status": 200,

@@ -1,12 +1,14 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS
 from flask_restful import Api
 from pymongo import MongoClient
 from backend.config import MONGO_USER, MONGO_PASS
 
 # create and configure flask app
 app = Flask(__name__.split('.')[0])
+CORS(app)
 
 MONGO_DB_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASS}@cluster0.vdjw7.mongodb.net/"
 mongo = MongoClient(MONGO_DB_URI)
