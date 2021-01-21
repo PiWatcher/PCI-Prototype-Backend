@@ -4,6 +4,7 @@ import json
 from backend import mongo
 from flask import jsonify, Response
 from bson import json_util
+
 class MongoService():
 
     def __init__(self):
