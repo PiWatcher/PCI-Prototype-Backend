@@ -4,6 +4,7 @@ import json
 from backend import mongo
 from flask import jsonify, Response
 from bson import json_util
+
 class MongoService():
 
     def __init__(self):
@@ -31,8 +32,6 @@ class MongoService():
                             mimetype='application/json', 
                             status=200)
 
-            # return json_response
-
         except Exception as error:
             json_response = {
                 "status": 400,
@@ -46,7 +45,6 @@ class MongoService():
     def collect_all_entries_by_room(self, building, room):
 
         try:
-
             room_entries = []
 
             # grab the database

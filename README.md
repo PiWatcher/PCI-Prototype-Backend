@@ -75,3 +75,12 @@ deactivate
 ```
 python start-backend.py
 ```
+
+4. To setup and run the application within docker:
+
+```
+docker build -t piwatcher-backend:latest .
+docker run -d -p 5000:5000 piwatcher-backend
+```
+
+You can check if the application is working by going to: localhost:5000/api
