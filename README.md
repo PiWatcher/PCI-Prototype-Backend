@@ -71,12 +71,14 @@ deactivate
 
 3. Once you have installed the required modules, the application is ready to be installed 
 
-### To start the server
+4. Ensure that you update the settings.py file with the correct configurations
+
+### To test and start the server
 ```
-python start-backend.py
+python app.py
 ```
 
-4. To setup and run the application within docker:
+5. To setup and run the application within docker:
 
 ```
 docker build -t piwatcher-backend:latest .
