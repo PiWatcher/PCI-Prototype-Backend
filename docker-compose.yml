@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  pci-prototype-backend:
+    image: pci-prototype-backend
+    environment:
+      - APP_ENV=${APP_ENV}
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    ports:
+      - "5000:5000"
