@@ -7,7 +7,7 @@ import config
 # instantiate Api with config API prefix
 api = Api(prefix=config.API_PREFIX)
 
-# instantiate mongo client connection
+# instantiate mongo instance
 mongo = MongoClient(config.MONGODB_URI)
 
 # Add resource to api

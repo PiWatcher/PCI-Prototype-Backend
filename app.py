@@ -4,6 +4,7 @@ import config
 
 from api import api
 from flask import Flask
+from flask_cors import CORS
 
 # setting up logging basic config
 logging.basicConfig(level=logging.DEBUG,
@@ -21,11 +22,14 @@ def create_app():
     logger.info(f'Loading Flask application configurations')
     app.config.from_object('config')
 
+    logger.info(f'Initializing cross-origin resource sharing')
+    CORS(app)
+
     logger.info(f'Initializing PCI-REST API backend')
     api.init_app(app)
 
     return app
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app = create_app()
     app.run(host='0.0.0.0', debug=True)
