@@ -31,17 +31,18 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=400))
 
-    def collect_all_entries_by_room(self, building, room):
+    def collect_all_entries_by_building(self, building):
         try:
             room_entries = []
             database_object = self.mongo[building]
-            collection_object = database_object[room]
-            room_entries = room_entries + [entry for entry in collection_object.find()]
+            collections = database_object.list_collections()
+
+            for collection in collections:
+                room_entries = room_entries + [entry for entry in database_object[collection['name']].find()]
 
             json_response = {
                 'status': 200,
                 'building': f'{building}',
-                'room': f'{room}',
                 'data': room_entries
             }
 
@@ -61,7 +62,6 @@ class MongoManagerService():
 
     def insert_entry_by_room(self, data):
         try:
-            data["timestamp"] = datetime.datetime.now()
             database_object = self.mongo[data["building"]]
             collection_object = database_object[data["endpoint"]]
             collection_object.insert_one(data)
@@ -72,7 +72,7 @@ class MongoManagerService():
                 'message': f"[{data['building']} ({data['building_id']})] {data['endpoint']} ({data['endpoint_id']}) successfully added it's entry"
             }
 
-            return Response(json.dumps(json_response),
+            return Response(json.dumps(json_response, default=json_util.default),
                             mimetype='application/json',
                             status=200)
         except Exception as error:

@@ -3,6 +3,7 @@ version: '3.4'
 services:
   pci-prototype-backend:
     image: pci-prototype-backend
+    container_name: pci-prototype-backend
     environment:
       - APP_ENV=${APP_ENV}
     build:
