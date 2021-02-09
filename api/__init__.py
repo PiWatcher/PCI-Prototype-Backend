@@ -13,5 +13,5 @@ mongo = MongoClient(config.MONGODB_URI)
 # Add resource to api
 api.add_resource(ApiBaseResource, '')
 api.add_resource(ApiBuildingResource, '/building')
-api.add_resource(ApiRoomResource, '/<string:building>/<string:room>')
+api.add_resource(ApiEntryResource, '/<building>')
 api.add_resource(ApiUpdateResource, '/update')

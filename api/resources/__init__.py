@@ -10,9 +10,9 @@ class ApiBuildingResource(Resource):
         response = mms().collect_all_buildings()
         return response
 
-class ApiRoomResource(Resource):
-    def get(self, building, room):
-        response = mms().collect_all_entries_by_room(building, room)
+class ApiEntryResource(Resource):
+    def get(self, building):
+        response = mms().collect_all_entries_by_building(building)
         return response
 
 class ApiUpdateResource(Resource):
