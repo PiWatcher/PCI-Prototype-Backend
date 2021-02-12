@@ -39,3 +39,11 @@ class ApiUpdateResource(Resource):
     def post(self):
         response = mms().insert_entry_by_room(request.json)
         return response
+
+class ApiSignupResource(Resource):
+    def post(self):
+        return request.json
+
+class ApiLoginResource(Resource):
+    def post(self):
+        return request.json
