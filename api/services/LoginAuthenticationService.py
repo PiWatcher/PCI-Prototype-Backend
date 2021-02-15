@@ -23,11 +23,29 @@ class LoginAuthenticationService():
         return self.__signup(data) 
 
     def __signin(self, data):
-        pass
+        # check verify login
+        if self.__verify_login(data['email'], data['password']):
+            json_response = {
+                'status': 200,
+                'description': 'Valid Email/Password combination'
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=json_response['status'])
+        
+        json_response = {
+            'status': 400,
+            'description': 'Invalid email/password combination'
+        }
+
+        return Response(json.dumps(json_response, default=json_util.default),
+                        mimetype='application/json',
+                        status=json_response['status'])
 
     def __signup(self, data):
         # check if user exists
-        if not self.__user_exists(data['email']):
+        if self.__user_exists(data['email']) is None:
             # build new json
             user = {
                 'email': data['email'],
@@ -63,6 +81,18 @@ class LoginAuthenticationService():
 
         # if user exists
         if potential_user:
-            return True
+            return potential_user
+        
+        # could not find user
+        return None 
+    
+    def __verify_login(self, email, password):
+        potential_user = self.__user_exists(email)
+
+        if potential_user:
+            return self.__verify_password(password.encode('utf-8'), potential_user['password'])
         
         return False
+
+    def __verify_password(self, password, hashed_password):
+        return bcrypt.checkpw(password, hashed_password)
