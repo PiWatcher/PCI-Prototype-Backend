@@ -45,6 +45,6 @@ class ApiSignupResource(Resource):
     def post(self):
         return las().handle_signup(request.json) 
 
-class ApiLoginResource(Resource):
+class ApiSigninResource(Resource):
     def post(self):
         return las().handle_signin(request.json)
