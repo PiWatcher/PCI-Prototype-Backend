@@ -21,4 +21,4 @@ RUN useradd piwatcher && chown -R piwatcher /pci-prototype-backend
 USER piwatcher
 
 # Start Gunicorn server
-CMD gunicorn --worker-class gevent --workers 8 --bind 0.0.0.0:5000 wsgi:app --max-requests 10000 --timeout 5 --keep-alive 5 --log-level info
+CMD gunicorn --worker-class gevent --bind localhost:5000 --workers 8 wsgi:app --max-requests 10000 --timeout 5 --keep-alive 5 --log-level info
