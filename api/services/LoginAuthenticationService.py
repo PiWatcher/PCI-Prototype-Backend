@@ -3,6 +3,7 @@ import json
 import bcrypt
 
 from flask import Response
+from flask_httpauth import HTTPBasicAuth
 from bson import json_util
 
 class LoginAuthenticationService():
