@@ -19,6 +19,8 @@ def create_app():
     logger.info(f'Starting app in {config.APP_ENV} environment')
     app = Flask(__name__)
 
+    app['SECRET_KEY'] = os.urandom(24)
+
     logger.info(f'Loading Flask application configurations')
     app.config.from_object('config')
 
