@@ -2,6 +2,7 @@ from flask import jsonify, request
 from flask_restful import Resource
 from flask_httpauth import HTTPBasicAuth
 from api.services.MongoManagerService import MongoManagerService as mms
+from api.services.LoginAuthenticationService import LoginAuthenticationService as las
 
 auth = HTTPBasicAuth()
 
@@ -42,8 +43,8 @@ class ApiUpdateResource(Resource):
 
 class ApiSignupResource(Resource):
     def post(self):
-        return request.json
+        return las().handle_signup(request.json) 
 
 class ApiLoginResource(Resource):
     def post(self):
-        return request.json
+        return las().handle_signin(request.json)
