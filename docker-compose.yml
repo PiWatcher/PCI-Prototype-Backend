@@ -2,12 +2,37 @@ version: '3.4'
 
 services:
   pci-prototype-backend:
-    image: pci-prototype-backend
     container_name: pci-prototype-backend
-    environment:
-      - APP_ENV=${APP_ENV}
+    restart: unless-stopped
     build:
       context: .
-      dockerfile: ./dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    depends_on:
+      - mongodb 
+    networks:
+      - backend
+
+  mongodb:
+    image: mongo:4.0.8
+    container_name: mongodb
+    restart: unless-stopped 
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin 
+      MONGO_INITDB_ROOT_PASSWORD: piwatcher2020 
+      MONGODB_DATA_DIR: /data/db
+      MONGODB_LOG_DIR: /dev/null
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - backend
+
+volumes:
+  mongodbdata:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
