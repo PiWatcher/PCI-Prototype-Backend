@@ -81,8 +81,13 @@ python app.py
 5. To setup and run the application within docker:
 
 ```
-docker build -t piwatcher-backend:latest .
-docker run -d -p 5000:5000 piwatcher-backend
+docker-compose up -d
 ```
 
 You can check if the application is working by going to: localhost:5000/api
+
+6. To completely clean Docker instances:
+
+```
+docker system prune -a
+```
