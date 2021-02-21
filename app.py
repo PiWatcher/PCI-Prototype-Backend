@@ -19,6 +19,8 @@ def create_app():
     logger.info(f'Starting app in {config.APP_ENV} environment')
     app = Flask(__name__)
 
+    app.config['SECRET_KEY'] = os.urandom(24)
+
     logger.info(f'Loading Flask application configurations')
     app.config.from_object('config')
 
@@ -32,4 +34,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host=config.BASE_URL, port=config.PORT)
