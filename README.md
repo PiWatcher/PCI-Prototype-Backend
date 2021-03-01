@@ -75,6 +75,8 @@ deactivate
 
 5. To setup and run the application within docker:
 
+First update the MONGO_USER, MONGO_PASS, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD in the docker-compose.yml file
+
 ```
 docker-compose up -d
 docker exec -it mongodb mongo -u <root_username> -p <root_password>
@@ -84,8 +86,8 @@ Now run the following MongoDB command:
 ```
 use admin
 db.createUser({
-    "user": "<insert_username_here>",
-    "pwd": "<insert_password_here>",
+    "user": "<insert_mongo_user_here>",
+    "pwd": "<insert_mongo_pass_here>",
     "roles": [ "readWriteAnyDatabase" ]
 })
 ```
