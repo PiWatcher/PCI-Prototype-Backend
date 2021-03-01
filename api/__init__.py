@@ -12,8 +12,15 @@ mongo = MongoClient(config.MONGODB_URI)
 
 # Add resource to api
 api.add_resource(ApiBaseResource, '')
-api.add_resource(ApiBuildingResource, '/building')
-api.add_resource(ApiEntryResource, '/<building>')
-api.add_resource(ApiUpdateResource, '/update')
-api.add_resource(ApiSignupResource, '/signup')
-api.add_resource(ApiSigninResource, '/signin')
+
+# authentication resources
+api.add_resource(ApiSignupResource, '/auth/signup')
+api.add_resource(ApiSigninResource, '/auth/signin')
+
+# data resources
+api.add_resource(ApiBuildingResource, '/data/buildings')
+api.add_resource(ApiEntryResource, '/data/building')
+api.add_resource(ApiUpdateResource, '/data/update')
+
+# mock resources
+api.add_resource(ApiMockResource, '/mock/update')

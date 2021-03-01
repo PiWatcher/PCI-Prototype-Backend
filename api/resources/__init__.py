@@ -19,6 +19,10 @@ class ApiEntryResource(Resource):
         response = mms().collect_all_entries_by_building(building)
         return response
 
+class ApiMockResource(Resource):
+    def post(self):
+        return jsonify({'status': 200, 'message': 'Mock Resource Hit'})
+
 class ApiUpdateResource(Resource):
     def post(self):
         response = mms().insert_entry_by_room(request.json)
