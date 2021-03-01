@@ -4,6 +4,12 @@ services:
   pci-prototype-backend:
     container_name: pci-prototype-backend
     restart: unless-stopped
+    environment:
+      APP_ENV: Development
+      MONGO_USER: <insert_mongo_user>
+      MONGO_PASS: <insert_mongo_pass>
+      MONGO_HOSTNAME: mongodb
+      MONGO_PORT: 27017
     build:
       context: .
       dockerfile: Dockerfile
@@ -20,8 +26,8 @@ services:
     restart: unless-stopped 
     command: mongod --auth
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin 
-      MONGO_INITDB_ROOT_PASSWORD: piwatcher2020 
+      MONGO_INITDB_ROOT_USERNAME: <insert_initdb_username>
+      MONGO_INITDB_ROOT_PASSWORD: <insert_initdb_password>
       MONGODB_DATA_DIR: /data/db
       MONGODB_LOG_DIR: /dev/null
     volumes:

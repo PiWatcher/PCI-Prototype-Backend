@@ -73,16 +73,24 @@ deactivate
 
 4. Ensure that you update the settings.py file with the correct configurations
 
-### To test and start the server
-```
-python app.py
-```
-
 5. To setup and run the application within docker:
 
 ```
 docker-compose up -d
+docker exec -it mongodb mongo -u <root_username> -p <root_password>
 ```
+
+Now run the following MongoDB command:
+```
+use admin
+db.createUser({
+    "user": "<insert_username_here>",
+    "pwd": "<insert_password_here>",
+    "roles": [ "readWriteAnyDatabase" ]
+})
+```
+
+From here, the application should be setup and ready to go.
 
 You can check if the application is working by going to: localhost:5000/api
 
