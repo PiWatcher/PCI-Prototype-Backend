@@ -113,8 +113,9 @@ class MongoManagerService():
         data['timestamp'] = datetime.datetime.now()
         data['building'] = building.capitalize()
         data['building_id'] = 1
+        data['count'] = random_count
         data['endpoint'] = f'Room {random_room}'
         data['endpoint_id'] = f'EPID_{random_endpoint_id}'
-        data['count'] = random_count
+        data['room_capacity'] = 50
 
         return data
