@@ -75,7 +75,12 @@ deactivate
 
 5. To setup and run the application within docker:
 
-First update the MONGO_USER, MONGO_PASS, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD in the docker-compose.yml file
+First, run this command to ignore all changes that is going to be made in this file
+```
+git update-index --assume-unchanged docker-compose.yml
+```
+
+Then update the MONGO_USER, MONGO_PASS, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD environment variables in the docker-compose.yml file
 
 ```
 docker-compose up -d
