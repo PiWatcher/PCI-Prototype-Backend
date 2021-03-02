@@ -1,3 +1,5 @@
+import os
+
 class BaseConfig():
     API_PREFIX = "/api"
     BASE_URL = "0.0.0.0"
@@ -8,17 +10,19 @@ class BaseConfig():
 class DevelopmentConfig(BaseConfig):
     FLASK_ENV = "development"
     DEBUG = True
-    MONGO_USER = ""
-    MONGO_PASS = ""
-    MONGO_HOSTNAME = "mongodb"
-    MONGO_PORT = "27017"
+    MONGO_USER = os.environ["MONGO_USER"]
+    MONGO_PASS = os.environ["MONGO_PASS"]
+    MONGO_HOSTNAME = os.environ["MONGO_HOSTNAME"]
+    MONGO_PORT = os.environ["MONGO_PORT"]
     MONGODB_URI = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOSTNAME}:{MONGO_PORT}/"
 
 class ProductionConfig(BaseConfig):
     FLASK_ENV = "production"
-    MONGO_USER = ""
-    MONGO_PASS = ""
-    MONGODB_URI = f"mongodb+srv://{MONGO_USER}:{MONGO_PASS}@cluster0.vdjw7.mongodb.net/"
+    MONGO_USER = os.environ["MONGO_USER"]
+    MONGO_PASS = os.environ["MONGO_PASS"]
+    MONGO_HOSTNAME = os.environ["MONGO_HOSTNAME"]
+    MONGO_PORT = os.environ["MONGO_PORT"]
+    MONGODB_URI = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOSTNAME}:{MONGO_PORT}/"
 
 class TestingConfiguration(BaseConfig):
     FLASK_ENV = "development"

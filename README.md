@@ -73,16 +73,31 @@ deactivate
 
 4. Ensure that you update the settings.py file with the correct configurations
 
-### To test and start the server
+5. To setup and run the application within docker:
+
+First, run this command to ignore all changes that is going to be made in this file
 ```
-python app.py
+git update-index --assume-unchanged docker-compose.yml
 ```
 
-5. To setup and run the application within docker:
+Then update the MONGO_USER, MONGO_PASS, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD environment variables in the docker-compose.yml file
 
 ```
 docker-compose up -d
+docker exec -it mongodb mongo -u <root_username> -p <root_password>
 ```
+
+Now run the following MongoDB command:
+```
+use admin
+db.createUser({
+    "user": "<insert_mongo_user_here>",
+    "pwd": "<insert_mongo_pass_here>",
+    "roles": [ "readWriteAnyDatabase" ]
+})
+```
+
+From here, the application should be setup and ready to go.
 
 You can check if the application is working by going to: localhost:5000/api
 
