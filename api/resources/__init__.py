@@ -15,13 +15,17 @@ class ApiBuildingResource(Resource):
         return response
 
 class ApiEntryResource(Resource):
-    def get(self, building):
-        response = mms().collect_all_entries_by_building(building)
+    def get(self):
+        response = mms().collect_all_entries_by_building(request.args.get("building"))
         return response
 
 class ApiMockResource(Resource):
-    def post(self):
-        return jsonify({'status': 200, 'message': 'Mock Resource Hit'})
+    def get(self):
+        building = request.args.get('building', type=str)
+        iterations = request.args.get('iterations', default=10, type=int)
+
+        response = mms().mock_data_entry(building, iterations)
+        return response
 
 class ApiUpdateResource(Resource):
     def post(self):
