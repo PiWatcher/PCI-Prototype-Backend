@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  pci-prototype-backend:
+  pci-backend:
     container_name: pci-backend:latest
     image: piwatcher/pci-backend:latest
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
     command: mongod --auth
     environment:
       MONGO_INITDB_ROOT_USERNAME: <insert_root_user> 
-      MONGO_INITDB_ROOT_PASSWORD: <isnert_root_password>
+      MONGO_INITDB_ROOT_PASSWORD: <insert_root_pass>
       MONGODB_DATA_DIR: /data/db
       MONGODB_LOG_DIR: /dev/null
     volumes:
