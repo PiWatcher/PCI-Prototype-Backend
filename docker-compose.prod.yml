@@ -1,15 +1,15 @@
 version: '3.4'
 
 services:
-  pci-backend:
-    container_name: pci-backend:latest
-    image: piwatcher/pci-backend:latest
+  pci-backend-prod:
+    container_name: pci-backend-prod
+    image: piwatcher/pci-backend:1.0.0
     restart: unless-stopped
     environment:
       APP_ENV: Production 
       MONGO_USER: <insert_mongo_user>
-      MONGO_PASS: <insert_mongo_pass> 
-      MONGO_HOSTNAME: mongodb
+      MONGO_PASS: <insert_mongo_pass>
+      MONGO_HOSTNAME: mongodb-prod
       MONGO_PORT: 27017
     build:
       context: .
@@ -17,29 +17,32 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - mongodb 
+      - mongodb-prod
     networks:
-      - backend
+      - backend_prod
+      - frontend_prod
 
-  mongodb:
+  mongodb-prod:
     image: mongo:4.0.8
     container_name: mongodb
     restart: unless-stopped 
     command: mongod --auth
     environment:
-      MONGO_INITDB_ROOT_USERNAME: <insert_root_user> 
+      MONGO_INITDB_ROOT_USERNAME: <insert_root_user>
       MONGO_INITDB_ROOT_PASSWORD: <insert_root_pass>
-      MONGODB_DATA_DIR: /data/db
+      MONGODB_DATA_DIR: /data/prod/db
       MONGODB_LOG_DIR: /dev/null
     volumes:
-      - mongodbdata:/data/db
+      - mongodbdata:/data/prod/db
     networks:
-      - backend
+      - backend_prod
 
 volumes:
   mongodbdata:
     driver: local
 
 networks:
-  backend:
+  backend_prod:
+    driver: bridge
+  frontend_prod:
     driver: bridge
