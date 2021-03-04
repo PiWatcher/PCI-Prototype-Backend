@@ -24,7 +24,7 @@ class ProductionConfig(BaseConfig):
     MONGO_PORT = os.environ["MONGO_PORT"]
     MONGODB_URI = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOSTNAME}:{MONGO_PORT}/"
 
-class TestingConfiguration(BaseConfig):
+class TestingConfig(BaseConfig):
     FLASK_ENV = "development"
     TESTING = True
     DEBUG = True
