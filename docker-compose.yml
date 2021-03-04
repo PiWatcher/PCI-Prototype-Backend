@@ -19,7 +19,6 @@ services:
       - mongodb-dev
     networks:
       - backend_dev
-      - frontend_dev
 
   mongodb-dev:
     image: mongo:4.0.8
@@ -42,6 +41,4 @@ volumes:
 
 networks:
   backend_dev:
-    driver: bridge
-  frontend_dev:
     driver: bridge

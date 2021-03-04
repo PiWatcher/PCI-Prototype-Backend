@@ -20,7 +20,6 @@ services:
       - mongodb-prod
     networks:
       - backend_prod
-      - frontend_prod
 
   mongodb-prod:
     image: mongo:4.0.8
@@ -43,6 +42,4 @@ volumes:
 
 networks:
   backend_prod:
-    driver: bridge
-  frontend_prod:
     driver: bridge
