@@ -69,28 +69,40 @@ You can leave the virtual environment by running in your CLI:
 deactivate
 ```
 
-3. Once you have installed the required modules, the application is ready to be run. Export the flask app for the application:
+3. Once you have installed the required modules, the application is ready to be installed 
 
-### For Windows CMD:
+4. Ensure that you update the settings.py file with the correct configurations
+
+5. To setup and run the application within docker:
+
+First, run this command to ignore all changes that is going to be made in this file
 ```
-set FLASK_APP=pci-backend
-set FLASK_ENV=development
-
-flask run
-```
-
-### For Windows PowerShell
-```
-$env:FLASK_APP="pci-backend"
-$env:FLASK_ENV="development"
-
-flask run
+git update-index --assume-unchanged docker-compose.yml
 ```
 
-### For Linux and Mac:
-```
-export FLASK_APP=pci-backend
-export FLASK_ENV=development
+Then update the MONGO_USER, MONGO_PASS, MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD environment variables in the docker-compose.yml file
 
-flask run
+```
+docker-compose up -d
+docker exec -it mongodb mongo -u <root_username> -p <root_password>
+```
+
+Now run the following MongoDB command:
+```
+use admin
+db.createUser({
+    "user": "<insert_mongo_user_here>",
+    "pwd": "<insert_mongo_pass_here>",
+    "roles": [ "readWriteAnyDatabase" ]
+})
+```
+
+From here, the application should be setup and ready to go.
+
+You can check if the application is working by going to: localhost:5000/api
+
+6. To completely clean Docker instances:
+
+```
+docker system prune -a
 ```

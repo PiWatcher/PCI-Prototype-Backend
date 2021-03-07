@@ -1,0 +1,10 @@
+.dockerignore
+.DS_Store
+.git
+.github
+.gitignore
+.gitmodules
+.sass-cache
+__pycache__
+env
+.vscode

@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+  pci-backend-dev:
+    container_name: pci-backend-dev
+    restart: unless-stopped
+    environment:
+      APP_ENV: Development
+      MONGO_USER: <insert_mongo_user>
+      MONGO_PASS: <insert_mongo_pass>
+      MONGO_HOSTNAME: mongodb-dev
+      MONGO_PORT: 27017
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb-dev
+    networks:
+      - backend_dev
+
+  mongodb-dev:
+    image: mongo:4.0.8
+    container_name: mongodb-dev
+    restart: unless-stopped 
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: <insert_root_user>
+      MONGO_INITDB_ROOT_PASSWORD: <insert_root_pass>
+      MONGODB_DATA_DIR: /data/db
+      MONGODB_LOG_DIR: /dev/null
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - backend_dev
+
+volumes:
+  mongodbdata:
+    driver: local
+
+networks:
+  backend_dev:
+    driver: bridge
