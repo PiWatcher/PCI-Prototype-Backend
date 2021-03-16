@@ -14,13 +14,21 @@ mongo = MongoClient(config.MONGODB_URI)
 api.add_resource(ApiBaseResource, '')
 
 # authentication resources
-api.add_resource(ApiSignupResource, '/auth/signup')
-api.add_resource(ApiSigninResource, '/auth/signin')
+api.add_resource(ApiAuthSignup, '/auth/signup')
+api.add_resource(ApiAuthSignin, '/auth/signin')
+api.add_resource(ApiAuthUsers, '/auth/users')
+api.add_resource(ApiAuthUsersUpdate, '/auth/users/update')
 
 # data resources
-api.add_resource(ApiBuildingResource, '/data/buildings')
-api.add_resource(ApiEntryResource, '/data/building')
-api.add_resource(ApiUpdateResource, '/data/update')
+api.add_resource(ApiDataBuildingRooms, '/data/building/rooms')
+api.add_resource(ApiDataBuildingRoomLive, '/data/building/room/live')
+api.add_resource(ApiDataBuildingRoomDaily, '/data/building/room/daily')
+api.add_resource(ApiDataBuildingRoomWeekly, '/data/building/room/weekly')
+api.add_resource(ApiDataBuildingRoomMonthly, '/data/building/room/monthly')
+api.add_resource(ApiDataBuildingRoomQuarterly, '/data/building/room/quarterly')
+api.add_resource(ApiDataBuildingRoomYearly, '/data/building/room/yearly')
+api.add_resource(ApiDataBuildings, '/data/buildings')
+api.add_resource(ApiDataIotUpdate, '/data/iot/update')
 
 # mock resources
 api.add_resource(ApiMockResource, '/mock/update')
