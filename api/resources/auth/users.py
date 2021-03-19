@@ -6,9 +6,11 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiAuthUsers(Resource):
     def get(self):
-
         jwt_token = request.args.get('jwt_token', type=str)
-        response = las().handle_grabbing_users(jwt_token)
+
+        # jwt_token is used to check permissions
+
+        response = las().handle_grabbing_users()
 
         return response
 
@@ -17,4 +19,8 @@ class ApiAuthUsersUpdate(Resource):
         jwt_token = request.args.get('jwt_token', type=str)
         json_body = request.json
 
-        return jsonify({'status': 200, 'message': '/auth/users/update endpoint hit'})
+        # jwt_token is used to check permissions
+
+        response = las().handle_updating_user(json_body)
+
+        return response

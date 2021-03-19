@@ -13,7 +13,7 @@ class LoginAuthenticationService():
         self.database = self.mongo['Users']
         self.collection = self.database['users']
 
-    def __grab_users(self, jwt_token):
+    def __grab_users(self):
         try:
             # grab all user accounts from the database
             user_entries = self.collection.find({}, {
@@ -50,8 +50,11 @@ class LoginAuthenticationService():
     def handle_signup(self, data):
         return self.__signup(data) 
 
-    def handle_grabbing_users(self, data):
-        return self.__grab_users(data)
+    def handle_grabbing_users(self):
+        return self.__grab_users()
+
+    def handle_updating_user(self, data):
+        return self.__update_user(data)
 
     def __signin(self, data):
         # check verify login
@@ -126,6 +129,33 @@ class LoginAuthenticationService():
         
         # could not find user
         return None 
+
+    def __update_user(self, data):
+        try:
+            email = data["email"]
+            new_role = data["new_role"]
+
+            # update document with new role
+            self.collection.update_one({"email": email}, {"$set": {"role": new_role}})
+            user = self.collection.find_one({"email": email})
+
+            json_response = {
+                'status': 200,
+                'user': {
+                    'email': user['email'],
+                    'full_name': user['full_name'],
+                    'role': user['role']
+                }
+            }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
+        
+        return Response(json.dumps(json_response, default=json_util.default),
+                        mimetype='application/json',
+                        status=json_response['status'])
     
     def __verify_login(self, email, password):
         potential_user = self.__user_exists(email)
