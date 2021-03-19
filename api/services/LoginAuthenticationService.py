@@ -13,6 +13,33 @@ class LoginAuthenticationService():
         self.database = self.mongo['Users']
         self.collection = self.database['users']
 
+    def __grab_users(self, jwt_token):
+        try:
+            # grab all user accounts from the database
+            user_entries = self.collection.find({}, {
+                "email": 1,
+                "full_name": 1,
+                "role": 1
+            })
+
+            # put user accounts on the backend
+            user_accounts = [user for user in user_entries]
+
+            json_response = {
+                'status': 200,
+                'users': user_accounts
+            }
+
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
+
+        return Response(json.dumps(json_response, default=json_util.default),
+                        mimetype='application/json',
+                        status=json_response['status'])
+
     def __hash_password(self, password):
         # hashes password and returns new password
         return bcrypt.hashpw(password, bcrypt.gensalt())
@@ -22,6 +49,9 @@ class LoginAuthenticationService():
 
     def handle_signup(self, data):
         return self.__signup(data) 
+
+    def handle_grabbing_users(self, data):
+        return self.__grab_users(data)
 
     def __signin(self, data):
         # check verify login
@@ -35,8 +65,8 @@ class LoginAuthenticationService():
                 # construct response
                 json_response = {
                     'status': 200,
-                    'name': user['name'],
-                    'role': user['user_type'],
+                    'full_name': user['full_name'],
+                    'role': user['role'],
                     'jwt_token': 'random_jwt_token'
                 }
 
@@ -61,8 +91,8 @@ class LoginAuthenticationService():
             user = {
                 'email': data['email'],
                 'password': self.__hash_password(data['password'].encode('utf-8')),
-                'name': data['name'],
-                'user_type': data['user_type']
+                'full_name': data['full_name'],
+                'role': 'public'
             }
 
             # insert new user
@@ -70,7 +100,7 @@ class LoginAuthenticationService():
 
             json_response = {
                 'status': 201,
-                'description': f'New {data["user_type"]} account was created!'
+                'description': f'New {user["role"]} account was created!'
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
