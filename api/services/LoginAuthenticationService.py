@@ -26,15 +26,25 @@ class LoginAuthenticationService():
     def __signin(self, data):
         # check verify login
         if self.__verify_login(data['email'], data['password']):
-            json_response = {
-                'status': 200,
-                'description': 'Valid Email/Password combination'
-            }
+            # grab user from database
+            user = self.__user_exists(data['email'])
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=json_response['status'])
-        
+            # check if user is not None
+            if user is not None:
+
+                # construct response
+                json_response = {
+                    'status': 200,
+                    'name': user['name'],
+                    'role': user['user_type'],
+                    'jwt_token': 'random_jwt_token'
+                }
+
+                return Response(json.dumps(json_response, default=json_util.default),
+                                mimetype='application/json',
+                                status=json_response['status'])
+
+        # construct a negative json response 
         json_response = {
             'status': 400,
             'description': 'Invalid email/password combination'
