@@ -6,11 +6,15 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiDataBuildingRoomLive(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_live_data(json_body)
+        return response
 
 class ApiDataBuildingRoomDaily(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_live_data(json_body)
+        return response
 
 class ApiDataBuildingRoomWeekly(Resource):
     def get(self):

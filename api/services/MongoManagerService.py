@@ -64,6 +64,43 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=400)
 
+    def collect_counts_of_rooms(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            rooms_and_counts = collection.aggregate([{$group: {_id: "$endpoint", current_count: {$last: "$count"}}}])
+
+            for one_room in rooms_and_counts:
+                for room, count in one_room:
+                    total_count = count
+                
+            total_room = len(rooms_and_counts)
+
+            json_response = {
+                'status': 200,
+                'room_total': total_room,
+                'count_total': total_count,
+                'data': rooms_and_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
+
+            return Response(json.dumps(json_response),
+                            mimetype='application/json',
+                            status=400)
+
     def insert_entry_by_room(self, data):
         try:
             database_object = self.mongo["Buildings"]
@@ -119,3 +156,38 @@ class MongoManagerService():
         data['room_capacity'] = 50
 
         return data
+
+###############################################################################
+########################Time Daily#############################################
+###############################################################################
+    def get_live_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            live_room_counts = collection.find(
+                {"endpoint":room})
+                .sort({$natural:1}).limit(720)
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
