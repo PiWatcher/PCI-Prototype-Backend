@@ -72,7 +72,7 @@ class MongoManagerService():
             
             room_list = collection.distinct("endpoint")
             
-            rooms_and_counts = collection.aggregate([{$group: {_id: "$endpoint", current_count: {$last: "$count"}}}])
+            rooms_and_counts = collection.aggregate([{"$group": {"_id": "$endpoint", "current_count": {"$last": "$count"}}}])
 
             for one_room in rooms_and_counts:
                 for room, count in one_room:
