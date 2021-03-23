@@ -11,12 +11,52 @@ class LoginAuthenticationService():
     def __init__(self):
         self.mongo = api.mongo
         self.database = self.mongo['Users']
-        self.collection = self.database['users']
+        self.users_collection = self.database['users']
+        self.roles_collection = self.database['roles']
+
+    def __construct_response(self, json_response):
+        return Response(json.dumps(json_response, default=json_util.default),
+                        mimetype='application/json',
+                        status=json_response['status'])
+
+    def __create_role(self, data):
+        try:
+            # check if role already exists
+            if self.__grab_role(data['role_name']) is not None:
+                # construct json object status: 409
+                json_response = {
+                    'status': 409,
+                    'error': f'{data["role_name"]} already exists!'
+                }
+            else:
+                # create role with new permission
+                self.roles_collection.insert_one({
+                    'role_name': data['role_name'],
+                    'is_admin': data['is_admin'],
+                    'can_view_raw': data['can_view_raw']
+                })
+
+                # grab the same role from the database
+                new_role = self.__grab_role(data['role_name'])
+                
+                # construct json object with status: 200
+                json_response = {
+                    'status': 200,
+                    'new_role': new_role
+                }
+
+        except Exception as error:
+            json_response = {
+                'status': 200,
+                'error': f'{error}'
+            }
+
+        return self.__construct_response(json_response)
 
     def __grab_users(self):
         try:
             # grab all user accounts from the database
-            user_entries = self.collection.find({}, {
+            user_entries = self.users_collection.find({}, {
                 "email": 1,
                 "full_name": 1,
                 "role": 1
@@ -36,6 +76,33 @@ class LoginAuthenticationService():
                 'error': f'{error}'
             }
 
+        return self.__construct_response(json_response)
+
+    def __grab_role(self, role_name):
+        # attempt to grab role from database and return it
+        return self.roles_collection.find_one({'role_name': role_name})
+
+    def __grab_roles(self):
+        try:
+            # grab all entries from the roles collections
+            roles_entries = self.roles_collection.find()
+
+            # construct list of roles
+            roles = [role for role in roles_entries]
+
+            # construct json response
+            json_response = {
+                'status': 200,
+                'roles': roles
+            }
+
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
+
+        # create and send resposne
         return Response(json.dumps(json_response, default=json_util.default),
                         mimetype='application/json',
                         status=json_response['status'])
@@ -44,14 +111,20 @@ class LoginAuthenticationService():
         # hashes password and returns new password
         return bcrypt.hashpw(password, bcrypt.gensalt())
 
+    def handle_creating_roles(self, data):
+        return self.__create_role(data)
+
+    def handle_grabbing_users(self):
+        return self.__grab_users()
+
+    def handle_grabbing_roles(self):
+        return self.__grab_roles()
+
     def handle_signin(self, data):
         return self.__signin(data)
 
     def handle_signup(self, data):
         return self.__signup(data) 
-
-    def handle_grabbing_users(self):
-        return self.__grab_users()
 
     def handle_updating_user(self, data):
         return self.__update_user(data)
@@ -99,7 +172,7 @@ class LoginAuthenticationService():
             }
 
             # insert new user
-            self.collection.insert_one(user)
+            self.users_collection.insert_one(user)
 
             json_response = {
                 'status': 201,
@@ -121,7 +194,7 @@ class LoginAuthenticationService():
 
     def __user_exists(self, email):
         # find user in the database by email
-        potential_user = self.collection.find_one({'email': email})
+        potential_user = self.users_collection.find_one({'email': email})
 
         # if user exists
         if potential_user:
@@ -136,8 +209,8 @@ class LoginAuthenticationService():
             new_role = data["new_role"]
 
             # update document with new role
-            self.collection.update_one({"email": email}, {"$set": {"role": new_role}})
-            user = self.collection.find_one({"email": email})
+            self.users_collection.update_one({"email": email}, {"$set": {"role": new_role}})
+            user = self.users_collection.find_one({"email": email})
 
             json_response = {
                 'status': 200,

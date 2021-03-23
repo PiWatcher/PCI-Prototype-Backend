@@ -18,6 +18,7 @@ api.add_resource(ApiAuthSignup, '/auth/signup')
 api.add_resource(ApiAuthSignin, '/auth/signin')
 api.add_resource(ApiAuthUsers, '/auth/users')
 api.add_resource(ApiAuthUsersUpdate, '/auth/users/update')
+api.add_resource(ApiAuthRoles, '/auth/roles')
 
 # data resources
 api.add_resource(ApiDataBuildingRooms, '/data/building/rooms')
