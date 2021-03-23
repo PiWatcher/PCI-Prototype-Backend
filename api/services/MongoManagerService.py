@@ -189,9 +189,9 @@ class MongoManagerService():
                 'error': f'{error}'
             }
 
-            return Response(json.dumps(json_response),
-                            mimetype='application/json',
-                            status=400)
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
 
     def get_daily_data(self, query_filter={}):
         try:
@@ -226,9 +226,9 @@ class MongoManagerService():
                 'error': f'{error}'
             }
 
-            return Response(json.dumps(json_response),
-                            mimetype='application/json',
-                            status=400)
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
 
     def get_weekly_data(self, query_filter={}):
         try:
