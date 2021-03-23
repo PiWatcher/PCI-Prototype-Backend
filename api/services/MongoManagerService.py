@@ -183,15 +183,15 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+            return Response(json.dumps(json_response),
+                            mimetype='application/json',
+                            status=400)
 
     def get_daily_data(self, query_filter={}):
         try:
@@ -220,15 +220,15 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+            return Response(json.dumps(json_response),
+                            mimetype='application/json',
+                            status=400)
 
     def get_weekly_data(self, query_filter={}):
         try:
@@ -256,11 +256,11 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
         return Response(json.dumps(json_response),
                         mimetype='application/json',
@@ -292,11 +292,11 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
         return Response(json.dumps(json_response),
                         mimetype='application/json',
@@ -328,11 +328,11 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
         return Response(json.dumps(json_response),
                         mimetype='application/json',
@@ -364,11 +364,11 @@ class MongoManagerService():
                             mimetype='application/json',
                             status=200)
 
-    except Exception as error:
-        json_response = {
-            'status': 400,
-            'error': f'{error}'
-        }
+        except Exception as error:
+            json_response = {
+                'status': 400,
+                'error': f'{error}'
+            }
 
         return Response(json.dumps(json_response),
                         mimetype='application/json',
