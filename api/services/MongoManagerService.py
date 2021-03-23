@@ -158,7 +158,7 @@ class MongoManagerService():
         return data
 
 ###############################################################################
-########################Time Daily#############################################
+########################Periodic Data Pulls####################################
 ###############################################################################
     def get_live_data(self, query_filter={}):
         try:
@@ -169,9 +169,10 @@ class MongoManagerService():
             
             room_list = collection.distinct("endpoint")
             
-            live_room_counts = collection.find(
-                {"endpoint":room})
-                .sort({$natural:1}).limit(720)
+            live_room_counts = db.Egr.aggregate(     
+                {$match:{"endpoint":room}},
+                {$limit: 720},
+                {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
 
             json_response = {
                 'status': 200,
@@ -191,3 +192,185 @@ class MongoManagerService():
         return Response(json.dumps(json_response),
                         mimetype='application/json',
                         status=400)
+
+    def get_daily_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            for skip_index in range(0, 61):
+                skip_count = skip_index * 288
+                live_room_counts = db.Egr.aggregate(
+                    {$match:{"endpoint":room}},
+                    {$skip: skip_count}
+                    {$limit: 288},
+                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
+
+    def get_weekly_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            for skip_index in range(0, 169):
+                skip_count = skip_index * 720
+                live_room_counts = db.Egr.aggregate(
+                    {$match:{"endpoint":room}},
+                    {$skip: skip_count}
+                    {$limit: 720},
+                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
+
+    def get_monthly_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            for skip_index in range(0, 731):
+                skip_count = skip_index * 720
+                live_room_counts = db.Egr.aggregate(
+                    {$match:{"endpoint":room}},
+                    {$skip: skip_count}
+                    {$limit: 720},
+                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
+
+    def get_quarterly_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            for skip_index in range(0, 93):
+                skip_count = skip_index * 17280
+                live_room_counts = db.Egr.aggregate(
+                    {$match:{"endpoint":room}},
+                    {$skip: skip_count}
+                    {$limit: 17280},
+                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
+
+    def get_yearly_data(self, query_filter={}):
+        try:
+            database_object = self.mongo["Buildings"]
+            building = query_filter["building_name"]
+            room = query_filter["room"]
+            collection = database_object[building]
+            
+            room_list = collection.distinct("endpoint")
+            
+            for skip_index in range(0, 369):
+                skip_count = skip_index * 17280
+                live_room_counts = db.Egr.aggregate(
+                    {$match:{"endpoint":room}},
+                    {$skip: skip_count}
+                    {$limit: 17280},
+                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+
+            json_response = {
+                'status': 200,
+                'data': live_room_counts
+            }
+
+            return Response(json.dumps(json_response, default=json_util.default),
+                            mimetype='application/json',
+                            status=200)
+
+    except Exception as error:
+        json_response = {
+            'status': 400,
+            'error': f'{error}'
+        }
+
+        return Response(json.dumps(json_response),
+                        mimetype='application/json',
+                        status=400)
+

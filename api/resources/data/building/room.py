@@ -18,16 +18,24 @@ class ApiDataBuildingRoomDaily(Resource):
 
 class ApiDataBuildingRoomWeekly(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_weekly_data(json_body)
+        return response
 
 class ApiDataBuildingRoomMonthly(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_monthly_data(json_body)
+        return response
 
 class ApiDataBuildingRoomQuarterly(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_quarterly_data(json_body)
+        return response
 
 class ApiDataBuildingRoomYearly(Resource):
     def get(self):
-        pass
+        json_body = request.json
+        response = get_yearly_data(json_body)
+        return response
