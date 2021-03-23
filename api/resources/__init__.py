@@ -7,6 +7,8 @@ from api.resources.auth import ApiAuthSignup
 
 from api.resources.auth.users import ApiAuthUsers, ApiAuthUsersUpdate
 
+from api.resources.auth.roles import ApiAuthRoles
+
 # data resources
 from api.resources.data import ApiDataBuildings
 from api.resources.data.building.rooms import ApiDataBuildingRooms
