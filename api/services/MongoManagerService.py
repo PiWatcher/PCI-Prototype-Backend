@@ -169,10 +169,10 @@ class MongoManagerService():
             
             room_list = collection.distinct("endpoint")
             
-            live_room_counts = db.Egr.aggregate(     
+            live_room_counts = collection.aggregate(     
                 {$match:{"endpoint":room}},
                 {$limit: 720},
-                {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                {$group: { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
             json_response = {
                 'status': 200,
@@ -204,11 +204,11 @@ class MongoManagerService():
             
             for skip_index in range(0, 61):
                 skip_count = skip_index * 288
-                live_room_counts = db.Egr.aggregate(
-                    {$match:{"endpoint":room}},
-                    {$skip: skip_count}
-                    {$limit: 288},
-                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                live_room_counts = collection.aggregate(
+                    {"$match":{"endpoint":room}},
+                    {"$skip": skip_count},
+                    {"$limit": 288},
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
 
             json_response = {
@@ -241,11 +241,11 @@ class MongoManagerService():
             
             for skip_index in range(0, 169):
                 skip_count = skip_index * 720
-                live_room_counts = db.Egr.aggregate(
-                    {$match:{"endpoint":room}},
-                    {$skip: skip_count}
-                    {$limit: 720},
-                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                live_room_counts = collection.aggregate(
+                    {"$match":{"endpoint":room}},
+                    {"$skip": skip_count},
+                    {"$limit": 720},
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
             json_response = {
                 'status': 200,
@@ -277,11 +277,11 @@ class MongoManagerService():
             
             for skip_index in range(0, 731):
                 skip_count = skip_index * 720
-                live_room_counts = db.Egr.aggregate(
-                    {$match:{"endpoint":room}},
-                    {$skip: skip_count}
-                    {$limit: 720},
-                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                live_room_counts = collection.aggregate(
+                    {"$match":{"endpoint":room}},
+                    {"$skip": skip_count},
+                    {"$limit": 720},
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
             json_response = {
                 'status': 200,
@@ -313,11 +313,11 @@ class MongoManagerService():
             
             for skip_index in range(0, 93):
                 skip_count = skip_index * 17280
-                live_room_counts = db.Egr.aggregate(
-                    {$match:{"endpoint":room}},
-                    {$skip: skip_count}
-                    {$limit: 17280},
-                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                live_room_counts = collection.aggregate(
+                    {"$match":{"endpoint":room}},
+                    {"$skip": skip_count},
+                    {"$limit": 17280},
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
             json_response = {
                 'status': 200,
@@ -349,11 +349,11 @@ class MongoManagerService():
             
             for skip_index in range(0, 369):
                 skip_count = skip_index * 17280
-                live_room_counts = db.Egr.aggregate(
-                    {$match:{"endpoint":room}},
-                    {$skip: skip_count}
-                    {$limit: 17280},
-                    {$group: { _id:"$endpoint", total_count:{$sum:"$count"}}})
+                live_room_counts = collection.aggregate(
+                    {"$match":{"endpoint":room}},
+                    {"$skip": skip_count},
+                    {"$limit": 17280},
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
 
             json_response = {
                 'status': 200,
