@@ -7,5 +7,5 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 class ApiDataBuildingRooms(Resource):
     def get(self):
         json_body = request.json
-        response = collect_counts_of_rooms(json_body)
+        response = mms().collect_counts_of_rooms(json_body)
         return response

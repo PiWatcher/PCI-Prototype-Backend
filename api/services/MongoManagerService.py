@@ -166,17 +166,21 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
+            total_count = 0
             
             room_list = collection.distinct("endpoint")
             
             live_room_counts = collection.aggregate(     
-                {$match:{"endpoint":room}},
-                {$limit: 720},
-                {$group: { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                [{"$match":{"endpoint":room}},
+                {"$limit": 720},
+                {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+            for item in live_room_counts:
+                total_count = f'total_count: {item["total_count"]}'
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': total_count
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -199,21 +203,26 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
-            
-            room_list = collection.distinct("endpoint")
+            daily_counts = []
             
             for skip_index in range(0, 61):
                 skip_count = skip_index * 288
-                live_room_counts = collection.aggregate(
-                    {"$match":{"endpoint":room}},
+                daily_room_cursor = collection.aggregate(
+                    [{"$match":{"endpoint":room}},
                     {"$skip": skip_count},
                     {"$limit": 288},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+                for item in daily_room_cursor:
+                    daily_counts.append(item["total_count"])
+
+            daily_counts_json = f"total_count: {daily_counts}"
+
 
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': daily_counts_json
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -236,20 +245,22 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
-            
-            room_list = collection.distinct("endpoint")
+            weekly_counts = []
             
             for skip_index in range(0, 169):
                 skip_count = skip_index * 720
-                live_room_counts = collection.aggregate(
-                    {"$match":{"endpoint":room}},
+                weekly_room_cursor = collection.aggregate(
+                    [{"$match":{"endpoint":room}},
                     {"$skip": skip_count},
                     {"$limit": 720},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+                for item in weekly_room_cursor:
+                    weekly_counts.append(item["total_count"])
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': weekly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -272,20 +283,22 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
-            
-            room_list = collection.distinct("endpoint")
+            monthly_counts = []
             
             for skip_index in range(0, 731):
                 skip_count = skip_index * 720
-                live_room_counts = collection.aggregate(
-                    {"$match":{"endpoint":room}},
+                monthly_room_cursor = collection.aggregate(
+                    [{"$match":{"endpoint":room}},
                     {"$skip": skip_count},
                     {"$limit": 720},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+                for item in monthly_room_cursor:
+                    monthly_counts.append(item["total_count"])
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': monthly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -308,20 +321,22 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
-            
-            room_list = collection.distinct("endpoint")
+            quarterly_counts = []
             
             for skip_index in range(0, 93):
                 skip_count = skip_index * 17280
-                live_room_counts = collection.aggregate(
-                    {"$match":{"endpoint":room}},
+                quarterly_room_cursor = collection.aggregate(
+                    [{"$match":{"endpoint":room}},
                     {"$skip": skip_count},
                     {"$limit": 17280},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+                for item in quarterly_room_cursor:
+                    quarterly_counts.append(item["total_count"])
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': quarterly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -344,20 +359,22 @@ class MongoManagerService():
             building = query_filter["building_name"]
             room = query_filter["room"]
             collection = database_object[building]
-            
-            room_list = collection.distinct("endpoint")
+            yearly_counts = []
             
             for skip_index in range(0, 369):
                 skip_count = skip_index * 17280
-                live_room_counts = collection.aggregate(
-                    {"$match":{"endpoint":room}},
+                yearly_room_cursor = collection.aggregate(
+                    [{"$match":{"endpoint":room}},
                     {"$skip": skip_count},
                     {"$limit": 17280},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}})
+                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+            
+                for item in yearly_room_cursor:
+                        yearly_counts.append(item["total_count"])
 
             json_response = {
                 'status': 200,
-                'data': live_room_counts
+                'data': yearly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
