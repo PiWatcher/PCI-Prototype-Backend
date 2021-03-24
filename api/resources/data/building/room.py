@@ -15,7 +15,8 @@ class ApiDataBuildingRoomLive(Resource):
 class ApiDataBuildingRoomDaily(Resource):
     def get(self):
         building_name = request.args.get('building_name', type=str)
-        params_dict = {'building_name': building_name}
+        room = request.args.get('room', type=str)
+        params_dict = {'building_name': building_name, 'room': room}
         response = mms().get_live_data(params_dict)
         return response
 
