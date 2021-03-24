@@ -69,16 +69,18 @@ class MongoManagerService():
             database_object = self.mongo["Buildings"]
             building = query_filter["building_name"]
             collection = database_object[building]
+            rooms_and_counts = {}
+            total_count = 0
             
-            room_list = collection.distinct("endpoint")
-            
-            rooms_and_counts = collection.aggregate([{"$group": {"_id": "$endpoint", "current_count": {"$last": "$count"}}}])
+            rooms_and_counts_cursor = collection.aggregate([{"$group": {"_id": "$endpoint", "current_count": {"$last": "$count"}}}])
 
-            for one_room in rooms_and_counts:
-                for room, count in one_room:
-                    total_count = count
+            for item in rooms_and_counts_cursor:
+                rooms_and_counts[item["_id"]]= item["current_count"]
                 
             total_room = len(rooms_and_counts)
+
+            for room in rooms_and_counts:
+                total_count += rooms_and_counts[room]
 
             json_response = {
                 'status': 200,
