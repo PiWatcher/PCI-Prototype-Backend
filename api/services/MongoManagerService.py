@@ -70,11 +70,13 @@ class MongoManagerService():
             building = query_filter["building_name"]
             collection = database_object[building]
             rooms_and_counts_list = []
+            rooms_and_counts = {}
             total_count = 0
             
             rooms_and_counts_cursor = collection.aggregate([{"$group": {"_id": "$endpoint", "current_count": {"$last": "$count"}}}])
 
             for item in rooms_and_counts_cursor:
+                rooms_and_counts[item["_id"]]= item["current_count"]
                 rooms_and_counts_list.append(item)
                 
             total_room = len(rooms_and_counts)
