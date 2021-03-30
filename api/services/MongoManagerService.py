@@ -180,15 +180,15 @@ class MongoManagerService():
             live_room_counts_cursor = collection.find(query_filter)
 
             for item in live_room_counts_cursor:
-                segmented_counts.append(item['count'])
+                segmented_counts.append(item)
 
-            json_str = self.__average_counts_by_time(segmented_counts, current_time, time_offset, endpoint_total)
+            #json_str = self.__average_counts_by_time(segmented_counts, current_time, time_offset, endpoint_total)
                 
-            daily_counts.append(json_str)
+            #daily_counts.append(json_str)
 
             json_response = {
                 'status': 200,
-                'data': json_str
+                'data': segmented_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
