@@ -1,6 +1,7 @@
 import api
 import json
-import datetime
+from datetime import timedelta
+import math
 import random
 
 from flask import Response
@@ -86,8 +87,6 @@ class MongoManagerService():
 
             json_response = {
                 'status': 200,
-                'room_total': total_room,
-                'count_total': total_count,
                 'data': rooms_and_counts_list
             }
 
@@ -164,27 +163,32 @@ class MongoManagerService():
 ###############################################################################
 ########################Periodic Data Pulls####################################
 ###############################################################################
-    def get_live_data(self, query_filter={}):
+    def get_live_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
+            time_offset = 0
             total_count = 0
+            daily_counts = []
+            segmented_counts = []
             
-            room_list = collection.distinct("endpoint")
-            
-            live_room_counts = collection.aggregate(     
-                [{"$match":{"endpoint":room}},
-                {"$limit": 720},
-                {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
 
-            for item in live_room_counts:
-                total_count = f'total_count: {item["total_count"]}'
+            
+            endpoint_total = len(collection.find(query_filter).distinct('endpoint_id'))
+            
+            live_room_counts_cursor = collection.find(query_filter)
+
+            for item in live_room_counts_cursor:
+                segmented_counts.append(item['count'])
+
+            json_str = self.__average_counts_by_time(segmented_counts, current_time, time_offset, endpoint_total)
+                
+            daily_counts.append(json_str)
 
             json_response = {
                 'status': 200,
-                'data': total_count
+                'data': daily_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -201,32 +205,38 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
-    def get_daily_data(self, query_filter={}):
+    def get_daily_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
             daily_counts = []
             
+
+            entry_offset = 288
+            time_offset = 5
+            
+
+            endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+            endpoint_total = len(endpoints)
+            
             for skip_index in range(0, 61):
-                skip_count = skip_index * 288
-                daily_room_cursor = collection.aggregate(
-                    [{"$match":{"endpoint":room}},
-                    {"$skip": skip_count},
-                    {"$limit": 288},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+                segmented_counts = []
+                skip_count = skip_index * entry_offset
+                daily_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in daily_room_cursor:
-                    daily_counts.append(item["total_count"])
+                    segmented_counts.append(item['count'])
+                    
+                daily_counts.append(self.__average_counts_by_time(segmented_counts, current_time, time_offset * (skip_index + 1), endpoint_total))
 
-            daily_counts_json = f"total_count: {daily_counts}"
 
 
 
             json_response = {
                 'status': 200,
-                'data': daily_counts_json
+                'data': daily_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -243,24 +253,31 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
-    def get_weekly_data(self, query_filter={}):
+    def get_weekly_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
             weekly_counts = []
             
+
+            entry_offset = 720
+            time_offset = 5
+            
+
+            endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+            endpoint_total = len(endpoints)
+            
             for skip_index in range(0, 169):
-                skip_count = skip_index * 720
-                weekly_room_cursor = collection.aggregate(
-                    [{"$match":{"endpoint":room}},
-                    {"$skip": skip_count},
-                    {"$limit": 720},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+                segmented_counts = []
+                skip_count = skip_index * entry_offset
+                weekly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in weekly_room_cursor:
-                    weekly_counts.append(item["total_count"])
+                    segmented_counts.append(item['count'])
+                    
+                weekly_counts.append(self.__average_counts_by_time(segmented_counts, current_time, time_offset * (skip_index + 1), endpoint_total))
 
             json_response = {
                 'status': 200,
@@ -281,24 +298,31 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
-    def get_monthly_data(self, query_filter={}):
+    def get_monthly_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
             monthly_counts = []
             
+
+            entry_offset = 720
+            time_offset = 5
+            
+
+            endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+            endpoint_total = len(endpoints)
+            
             for skip_index in range(0, 731):
-                skip_count = skip_index * 720
-                monthly_room_cursor = collection.aggregate(
-                    [{"$match":{"endpoint":room}},
-                    {"$skip": skip_count},
-                    {"$limit": 720},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+                segmented_counts = []
+                skip_count = skip_index * entry_offset
+                monthly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in monthly_room_cursor:
-                    monthly_counts.append(item["total_count"])
+                    segmented_counts.append(item['count'])
+                    
+                monthly_counts.append(self.__average_counts_by_time(segmented_counts, current_time, time_offset * (skip_index + 1), endpoint_total))
 
             json_response = {
                 'status': 200,
@@ -319,24 +343,31 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
-    def get_quarterly_data(self, query_filter={}):
+    def get_quarterly_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
             quarterly_counts = []
             
+
+            entry_offset = 17280
+            time_offset = 5
+            
+
+            endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+            endpoint_total = len(endpoints)
+            
             for skip_index in range(0, 93):
-                skip_count = skip_index * 17280
-                quarterly_room_cursor = collection.aggregate(
-                    [{"$match":{"endpoint":room}},
-                    {"$skip": skip_count},
-                    {"$limit": 17280},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+                segmented_counts = []
+                skip_count = skip_index * entry_offset
+                quarterly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in quarterly_room_cursor:
-                    quarterly_counts.append(item["total_count"])
+                    segmented_counts.append(item['count'])
+                    
+                quarterly_counts.append(self.__average_counts_by_time(segmented_counts, current_time, time_offset * (skip_index + 1), endpoint_total))
 
             json_response = {
                 'status': 200,
@@ -357,24 +388,31 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
-    def get_yearly_data(self, query_filter={}):
+    def get_yearly_data(self, query_filter, current_time):
         try:
             database_object = self.mongo["Buildings"]
-            building = query_filter["building_name"]
-            room = query_filter["room"]
+            building = query_filter["building"]
             collection = database_object[building]
             yearly_counts = []
             
-            for skip_index in range(0, 369):
-                skip_count = skip_index * 17280
-                yearly_room_cursor = collection.aggregate(
-                    [{"$match":{"endpoint":room}},
-                    {"$skip": skip_count},
-                    {"$limit": 17280},
-                    {"$group": { "_id":"$endpoint", "total_count":{"$sum":"$count"}}}])
+
+            entry_offset = 17280
+            time_offset = 5
             
+
+            endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+            endpoint_total = len(endpoints)
+            
+            for skip_index in range(0, 369):
+                segmented_counts = []
+                skip_count = skip_index * entry_offset
+                yearly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
                 for item in yearly_room_cursor:
-                        yearly_counts.append(item["total_count"])
+                    segmented_counts.append(item['count'])
+                    
+                yearly_counts.append(self.__average_counts_by_time(segmented_counts, current_time, time_offset * (skip_index + 1), endpoint_total))
 
             json_response = {
                 'status': 200,
@@ -395,3 +433,15 @@ class MongoManagerService():
                         mimetype='application/json',
                         status=400)
 
+    def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
+        total_count = 0
+        for count in segmented_counts:
+            total_count += count
+
+        total_avg_count = math.floor(total_count / endpoint_total)
+
+        json_time = str(current_time - timedelta(minutes = time_offset))
+
+        count_json = {'timestamp': json_time, 'count' : total_avg_count}
+
+        return count_json
