@@ -150,7 +150,7 @@ class MongoManagerService():
         random_endpoint_id = random.randint(1,4)
         random_count = random.randint(1, 50)
 
-        data['timestamp'] = datetime.now() - timedelta(minutes = random_room)
+        data['timestamp'] = datetime.now()
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
