@@ -150,11 +150,11 @@ class MongoManagerService():
         random_endpoint_id = random.randint(1,4)
         random_count = random.randint(1, 50)
 
-        data['timestamp'] = datetime.now()
+        data['timestamp'] = datetime.now() - timedelta(minutes = random_room)
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
-        data['endpoint'] = f'Room {random_room}'
+        data['endpoint'] = f'Room 120'
         data['endpoint_id'] = f'EPID_{random_endpoint_id}'
         data['room_capacity'] = 50
 
@@ -171,24 +171,25 @@ class MongoManagerService():
             time_offset = 0
             total_count = 0
             daily_counts = []
-            segmented_counts = []
+            json_str = []
+            entry_offset = 720
+
             
 
             
             endpoint_total = len(collection.find(query_filter).distinct('endpoint_id'))
             
-            live_room_counts_cursor = collection.find(query_filter)
+            live_room_counts_cursor = collection.find(query_filter).limit(entry_offset)
 
             for item in live_room_counts_cursor:
-                segmented_counts.append(item['count'])
-
-            json_str = self.__average_counts_by_time(segmented_counts, current_time, time_offset, endpoint_total)
-                
-            daily_counts.append(json_str)
+                temp_dict = {}
+                temp_dict['timestamp'] = item['timestamp']
+                temp_dict['count'] = item['count']
+                json_str.append(temp_dict)
 
             json_response = {
                 'status': 200,
-                'data': daily_counts
+                'data': json_str
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
