@@ -154,7 +154,7 @@ class MongoManagerService():
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
-        data['endpoint'] = f'Room 120'
+        data['endpoint'] = f'Room {random_room}'
         data['endpoint_id'] = f'EPID_{random_endpoint_id}'
         data['room_capacity'] = 50
 
@@ -442,12 +442,15 @@ class MongoManagerService():
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
 
-        for count in segmented_counts:
-            total_count += count
+        if(segmented_counts is None):
+            total_avg_count = 0
+        else:
+            for count in segmented_counts:
+                total_count += count
 
-        total_avg_count = math.floor(total_count / endpoint_total)
+            total_avg_count = math.floor(total_count / endpoint_total * len(segmented_counts) )
 
-        json_time = current_time - timedelta(minutes = time_offset)
+            json_time = current_time - timedelta(minutes = time_offset)
 
         count_json = {'timestamp': json_time, 'count' : total_avg_count}
 
