@@ -1,6 +1,6 @@
 import api
 import json
-from datetime import timedelta
+from datetime import timedelta, datetime
 import math
 import random
 
@@ -150,7 +150,7 @@ class MongoManagerService():
         random_endpoint_id = random.randint(1,4)
         random_count = random.randint(1, 50)
 
-        data['timestamp'] = datetime.datetime.now()
+        data['timestamp'] = datetime.now()
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
@@ -188,7 +188,7 @@ class MongoManagerService():
 
             json_response = {
                 'status': 200,
-                'data': daily_counts
+                'data': json_str
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -214,7 +214,7 @@ class MongoManagerService():
             
 
             entry_offset = 288
-            time_offset = 5
+            time_offset = 60
             
 
             endpoints = collection.find(query_filter).distinct('endpoint_id')
@@ -222,6 +222,7 @@ class MongoManagerService():
             endpoint_total = len(endpoints)
             
             for skip_index in range(0, 61):
+                time_offset = time_offset * (skip_index + 1)
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
                 daily_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
@@ -262,7 +263,7 @@ class MongoManagerService():
             
 
             entry_offset = 720
-            time_offset = 5
+            time_offset = 60
             
 
             endpoints = collection.find(query_filter).distinct('endpoint_id')
@@ -270,6 +271,7 @@ class MongoManagerService():
             endpoint_total = len(endpoints)
             
             for skip_index in range(0, 169):
+                time_offset = time_offset * (skip_index + 1)
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
                 weekly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
@@ -307,7 +309,7 @@ class MongoManagerService():
             
 
             entry_offset = 720
-            time_offset = 5
+            time_offset = 60
             
 
             endpoints = collection.find(query_filter).distinct('endpoint_id')
@@ -315,6 +317,7 @@ class MongoManagerService():
             endpoint_total = len(endpoints)
             
             for skip_index in range(0, 731):
+                time_offset = time_offset * (skip_index + 1)
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
                 monthly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
@@ -352,7 +355,7 @@ class MongoManagerService():
             
 
             entry_offset = 17280
-            time_offset = 5
+            time_offset = 1440
             
 
             endpoints = collection.find(query_filter).distinct('endpoint_id')
@@ -360,6 +363,7 @@ class MongoManagerService():
             endpoint_total = len(endpoints)
             
             for skip_index in range(0, 93):
+                time_offset = time_offset * (skip_index + 1)
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
                 quarterly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
@@ -397,7 +401,7 @@ class MongoManagerService():
             
 
             entry_offset = 17280
-            time_offset = 5
+            time_offset = 1440
             
 
             endpoints = collection.find(query_filter).distinct('endpoint_id')
@@ -405,6 +409,7 @@ class MongoManagerService():
             endpoint_total = len(endpoints)
             
             for skip_index in range(0, 369):
+                time_offset = time_offset * (skip_index + 1)
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
                 yearly_room_cursor = collection.find(query_filter).skip( skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
@@ -435,6 +440,7 @@ class MongoManagerService():
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
+
         for count in segmented_counts:
             total_count += count
 
