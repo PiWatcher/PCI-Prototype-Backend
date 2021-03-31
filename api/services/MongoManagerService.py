@@ -449,7 +449,9 @@ class MongoManagerService():
             for count in segmented_counts:
                 total_count += count
 
-            total_avg_count = math.floor(total_count / (endpoint_total * len(segmented_counts)) )
+            total_avg_count = math.floor(total_count / endpoint_total )
+
+            total_avg_count = math.floor(total_count / len(segmented_counts))
 
             json_time = current_time - timedelta(minutes = time_offset)
 
