@@ -157,7 +157,7 @@ class MongoManagerService():
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
-        data['endpoint'] = f'Room 101'
+        data['endpoint'] = f'Room {random_room}'
         data['endpoint_id'] = f'EPID_{random_endpoint_id}'
         data['room_capacity'] = 50
 
@@ -173,25 +173,27 @@ class MongoManagerService():
             collection = database_object[building]
             time_offset = 0
             total_count = 0
-            daily_counts = []
-            json_str = []
-            entry_offset = 720
+
+            live_counts = []
 
             endpoint_total = len(collection.find(
                 query_filter).distinct('endpoint_id'))
 
-            live_room_counts_cursor = collection.find(
-                query_filter).limit(entry_offset)
+            for skip_index in range(0, 288):
+                new_time_offset = time_offset * skip_index
+                segmented_counts = []
+                live_room_counts_cursor = collection.find(query_filter).skip(
+                    skip_index *endpoint_total).limit(endpoint_total)
 
-            for item in live_room_counts_cursor:
-                temp_dict = {}
-                temp_dict['timestamp'] = item['timestamp']
-                temp_dict['count'] = item['count']
-                json_str.append(temp_dict)
+                for item in live_room_counts_cursor:
+                    segmented_counts.append(item['count'])
+
+                live_counts.append(self.__average_counts_by_time(
+                    segmented_counts, current_time, new_time_offset, endpoint_total))
 
             json_response = {
                 'status': 200,
-                'data': json_str
+                'data': live_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -463,6 +465,6 @@ class MongoManagerService():
         json_time = current_time - timedelta(minutes=time_offset)
 
         count_json = {'timestamp': json_time,
-                      'count': total_avg_count, 'counts': len(segmented_counts)}
+                      'count': total_avg_count}
 
         return count_json
