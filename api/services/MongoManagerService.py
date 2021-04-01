@@ -235,9 +235,11 @@ class MongoManagerService():
                 daily_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+            reversed_daily_counts = daily_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': daily_counts
+                'data': reversed_daily_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -272,7 +274,7 @@ class MongoManagerService():
                 new_time_offset = time_offset * skip_index
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
-                weekly_room_cursor = collection.find(query_filter).skip(
+                weekly_room_cursor = collection.find(query_filter).sort(["_id", 1]).skip(
                     skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in weekly_room_cursor:
@@ -281,9 +283,11 @@ class MongoManagerService():
                 weekly_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+            reversed_weekly_counts = weekly_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': weekly_counts
+                'data': reversed_weekly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -327,9 +331,11 @@ class MongoManagerService():
                 monthly_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+            reversed_monthly_counts = monthly_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': monthly_counts
+                'data': reversed_monthly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -373,9 +379,11 @@ class MongoManagerService():
                 quarterly_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+            reversed_quarterly_counts = quarterly_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': quarterly_counts
+                'data': reversed_quarterly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -419,9 +427,11 @@ class MongoManagerService():
                 yearly_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+            reversed_yearly_counts = yearly_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': yearly_counts
+                'data': reversed_yearly_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -450,7 +460,7 @@ class MongoManagerService():
 
             total_avg_count = math.floor(total_count / len(segmented_counts))
 
-            json_time = current_time - timedelta(minutes=time_offset)
+        json_time = current_time - timedelta(minutes=time_offset)
 
         count_json = {'timestamp': json_time,
                       'count': total_avg_count, 'counts': len(segmented_counts)}
