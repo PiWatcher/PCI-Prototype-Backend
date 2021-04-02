@@ -183,10 +183,11 @@ class MongoManagerService():
                 new_time_offset = time_offset * skip_index
                 segmented_counts = []
                 live_room_counts_cursor = collection.find(query_filter).skip(
-                    skip_index *endpoint_total).limit(endpoint_total)
+                    skip_index * endpoint_total).limit(endpoint_total)
 
                 for item in live_room_counts_cursor:
                     segmented_counts.append(item['count'])
+                    current_time = item['timestamp']
 
                 live_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
