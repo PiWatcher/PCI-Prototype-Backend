@@ -277,8 +277,7 @@ class MongoManagerService():
                 new_time_offset = time_offset * skip_index
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
-                weekly_room_cursor = collection.find(query_filter).sort(["_id", 1]).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+                weekly_room_cursor = collection.find(query_filter).skip(skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in weekly_room_cursor:
                     segmented_counts.append(item['count'])
