@@ -187,14 +187,15 @@ class MongoManagerService():
 
                 for item in live_room_counts_cursor:
                     segmented_counts.append(item['count'])
-                
 
                 live_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
 
+                reversed_live_counts = live_counts[::-1]
+
             json_response = {
                 'status': 200,
-                'data': live_counts
+                'data': reversed_live_counts
             }
 
             return Response(json.dumps(json_response, default=json_util.default),
@@ -277,7 +278,8 @@ class MongoManagerService():
                 new_time_offset = time_offset * skip_index
                 segmented_counts = []
                 skip_count = skip_index * entry_offset
-                weekly_room_cursor = collection.find(query_filter).skip(skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+                weekly_room_cursor = collection.find(query_filter).skip(
+                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
 
                 for item in weekly_room_cursor:
                     segmented_counts.append(item['count'])
@@ -462,8 +464,6 @@ class MongoManagerService():
                 total_count += count
 
             total_avg_count = math.floor(total_count / len(segmented_counts))
-
-        
 
         count_json = {'timestamp': json_time,
                       'count': total_avg_count}
