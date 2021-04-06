@@ -453,6 +453,7 @@ class MongoManagerService():
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
         json_time = current_time
+        json_time = current_time - timedelta(minutes=time_offset)
 
         if(len(segmented_counts) == 0):
             total_avg_count = 0
@@ -462,7 +463,7 @@ class MongoManagerService():
 
             total_avg_count = math.floor(total_count / len(segmented_counts))
 
-        json_time = current_time - timedelta(minutes=time_offset)
+        
 
         count_json = {'timestamp': json_time,
                       'count': total_avg_count}
