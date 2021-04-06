@@ -171,7 +171,7 @@ class MongoManagerService():
             database_object = self.mongo["Buildings"]
             building = query_filter["building"]
             collection = database_object[building]
-            time_offset = 0
+            time_offset = 1/12
             total_count = 0
 
             live_counts = []
@@ -187,7 +187,7 @@ class MongoManagerService():
 
                 for item in live_room_counts_cursor:
                     segmented_counts.append(item['count'])
-                    current_time = item['timestamp']
+                
 
                 live_counts.append(self.__average_counts_by_time(
                     segmented_counts, current_time, new_time_offset, endpoint_total))
