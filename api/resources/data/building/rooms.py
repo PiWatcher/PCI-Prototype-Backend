@@ -6,4 +6,8 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiDataBuildingRooms(Resource):
     def get(self):
-        pass
+        building_name = request.args.get('building_name', type=str)
+        room = request.args.get('room', type=str)
+        params_dict = {'building_name': building_name, 'room': room}
+        response = mms().collect_counts_of_rooms(params_dict)
+        return response
