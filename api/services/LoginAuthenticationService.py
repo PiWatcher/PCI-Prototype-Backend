@@ -1,8 +1,6 @@
-import api
-
 from api.services.BaseService import BaseService
-from api.models.account import Account
-from api.models.role import Role
+from api.models.AccountModel import Account
+from api.models.RoleModel import Role
 from api.errors.errors import *
 
 class LoginAuthenticationService(BaseService):
@@ -41,6 +39,7 @@ class LoginAuthenticationService(BaseService):
 
             # if role does not exist
             if new_role is None:
+                # raise FailedRoleCreationError
                 raise InternalServerError
 
             # construct successful response 
@@ -159,6 +158,7 @@ class LoginAuthenticationService(BaseService):
 
             # if user was not created
             if user is None:
+                # raise FailedUserCreationError
                 raise InternalServerError
 
             # construct successful response

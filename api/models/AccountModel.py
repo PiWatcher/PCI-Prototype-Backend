@@ -22,11 +22,26 @@ class Account():
     def get_email(self):
         return self.email
 
+    def set_email(self, email):
+        self.email = email
+        return self
+
+    def set_password(self, password):
+        self.password = password
+
     def get_full_name(self):
         return self.full_name
 
+    def set_full_name(self, full_name):
+        self.full_name = full_name
+        return self
+
     def get_role(self):
         return self.role
+
+    def set_role(self, role):
+        self.role = role
+        return self
     
     def to_json(self):
         return self.__dict__

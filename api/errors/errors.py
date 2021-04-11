@@ -4,6 +4,15 @@ class InternalServerError(Exception):
 class SchemaValidationError(Exception):
     pass
 
+class FailedEntryCreationError(Exception):
+    pass
+
+class FailedRoleCreationError(Exception):
+    pass
+
+class FailedUserCreationError(Exception):
+    pass
+
 class EmailAlreadyExistsError(Exception):
     pass
 
@@ -30,6 +39,18 @@ errors = {
     "SchemaValidationError": {
         "status": 400,
         "message": "Request is missing required fields."
+    },
+    "FailedEntryCreationError": {
+        "status": 400,
+        "message": "Entry failed to create. Try again."
+    },
+    "FailedRoleCreationError": {
+        "status": 400,
+        "message": "Role failed to create. Try again."
+    },
+    "FailedUserCreationError": {
+        "status": 400,
+        "message": "User failed to create. Try again."
     },
     "EmailAlreadyExistsError": {
         "status": 400,

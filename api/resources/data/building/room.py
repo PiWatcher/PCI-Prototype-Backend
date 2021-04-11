@@ -9,10 +9,9 @@ class ApiDataBuildingRoomLive(Resource):
     def get(self):
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
-        current_time = datetime.now()
-        interval = datetime.now() - timedelta(minutes = 60)
-        params_dict = {"timestamp": {"$lte": current_time, "$gte": interval} ,"building": building_name, "endpoint": room}
-        response = mms().get_live_data(params_dict, current_time)
+
+        response = mms().get_live_data(building_name, room, current_time)
+
         return response
 
 class ApiDataBuildingRoomDaily(Resource):
