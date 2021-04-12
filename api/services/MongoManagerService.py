@@ -255,8 +255,8 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
 
         #     for skip_index in range(0, 717):
         #         new_time_offset = time_offset * skip_index
@@ -331,8 +331,8 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
 
         #     database_object = self.mongo["Buildings"]
         #     building = query_filter["building"]
@@ -418,8 +418,8 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
 
         #     database_object = self.mongo["Buildings"]
         #     building = query_filter["building"]
@@ -494,8 +494,8 @@ class MongoManagerService(BaseService):
             
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
 
         #     database_object = self.mongo["Buildings"]
         #     building = query_filter["building"]
@@ -580,8 +580,8 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
         
         # try:
         #     database_object = self.mongo["Buildings"]
@@ -667,8 +667,8 @@ class MongoManagerService(BaseService):
             })
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Excpetion:
-            return super().construct_response(errors["InternalServerError"])
+        except Exception as error:
+            return super().construct_response(errors["InternalServerError"].add("error", f'{error}'))
 
         # try:
         #     database_object = self.mongo["Buildings"]
