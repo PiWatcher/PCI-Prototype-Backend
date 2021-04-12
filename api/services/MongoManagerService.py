@@ -26,7 +26,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
     def collect_counts_of_buildings(self, building):
         try:
@@ -59,7 +59,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # # Internal Server Error
         # except (InternalServerError, Exception):
@@ -129,7 +129,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except (InternalServerError, Exception):
         #     return super().construct_response(errors["InternalServerError"])
@@ -266,8 +266,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             live_counts = self.__live_data_segmenter(query_filter,
@@ -287,7 +286,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except Exception as error:
         #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
@@ -319,8 +318,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             daily_counts = self.__data_segmenter(query_filter,
@@ -341,7 +339,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except Exception as error:
         #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
@@ -371,8 +369,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             weekly_counts = self.__data_segmenter(query_filter,
@@ -393,7 +390,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except Exception as error:
         #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
@@ -424,8 +421,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             monthly_counts = self.__data_segmenter(query_filter,
@@ -440,7 +436,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except Exception as error:
         #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
@@ -469,8 +465,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             quarterly_counts = self.__data_segmenter(query_filter,
@@ -491,7 +486,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
         # except Exception as error:
         #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
@@ -521,8 +516,7 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
             yearly_counts = self.__data_segmenter(query_filter,
@@ -542,7 +536,7 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+            return super().construct_response(error_message)
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
