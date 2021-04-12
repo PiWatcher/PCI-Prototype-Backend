@@ -24,6 +24,8 @@ class MongoManagerService(BaseService):
             })
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def collect_counts_of_buildings(self, building):
@@ -55,6 +57,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # # Internal Server Error
@@ -123,6 +127,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["FailedEntryCreationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except (InternalServerError, Exception):
@@ -279,6 +285,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except Exception as error:
@@ -331,6 +339,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except Exception as error:
@@ -381,6 +391,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except Exception as error:
@@ -426,6 +438,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except Exception as error:
@@ -475,6 +489,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
         # except Exception as error:
@@ -524,6 +540,8 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
 
         except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
