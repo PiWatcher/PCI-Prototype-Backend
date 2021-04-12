@@ -169,7 +169,42 @@ class MongoManagerService(BaseService):
 
         return data
 
-    def __data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints, entry_offset=None, is_live=False):
+    def __live_data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints):
+        # constants
+        DECREASING = -1
+        BEGINNING = 0
+        
+        segmented_data = []
+        
+        # iterate through and segment, average, then append data
+        for skip_index in range(0, upper_limit):
+            # calculate new time interval
+            new_time_offset = time_offset * skip_index
+            
+            # prepare data segment list
+            room_entries = []
+
+            # skip by how many entries
+            skip_counts = skip_index * num_of_endpoints
+
+            # limit entries per query
+            limited_entries = num_of_endpoints
+
+            # grab cursor for rooms
+            room_cursor = super().get_database("Buildings")[query_filter["building"]].find(
+                query_filter, {'count': 1}).sort('_id', DECREASING).skip(skip_counts).limit(limited_entries)
+
+            # average entries
+            averaged_entries = self.__average_counts_by_time(
+                room_entries, query_filter["timestamp"]["$lte"], new_time_offset, num_of_endpoints)
+
+            # append entries to data
+            segmented_data.append(BEGINNING, averaged_entries)
+
+        # return averaged segmented data
+        return segmented_data
+
+    def __data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints, entry_offset):
         # constants
         DECREASING = -1
         BEGINNING = 0
@@ -181,26 +216,21 @@ class MongoManagerService(BaseService):
             # calculate new time interval
             new_time_offset = time_offset * skip_index
 
-            # check if we are querying live data
-            if is_live:
-                # skip by how many entries
-                skip_counts = skip_index * num_of_endpoints
+            room_entries = []
 
-                # limit entries per query
-                limited_entries = num_of_endpoints
-            else:
-                # skip by how many entries
-                skip_counts = skip_index * entry_offset * num_of_endpoints
+            # skip by how many entries
+            skip_counts = skip_index * entry_offset * num_of_endpoints
 
-                # limit entries per query
-                limited_entries = entry_offset * num_of_endpoints
+            # limit entries per query
+            limited_entries = entry_offset * num_of_endpoints
 
             # grab cursor for rooms
-            room_cursor = super().get_database("Buidlings")[query_filter["building"]].find(
-                query_filter).sort('_id', DECREASING).skip(skip_counts).limit(limited_entries)
+            room_cursor = super().get_database("Buildings")[query_filter["building"]].find(
+                query_filter, {'count': 1}).sort('_id', DECREASING).skip(skip_counts).limit(limited_entries)
 
             # add all entries in the room
-            room_entries = [item['count'] for item in room_cursor]
+            for entry in room_cursor:
+                room_entries.append(entry['count'])
 
             # average entries
             averaged_entries = self.__average_counts_by_time(
@@ -240,12 +270,11 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            live_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, is_live=True)
+            live_counts = self.__live_data_segmenter(query_filter, number_of_entries,
+                time_offset, endpoint_total)
 
             # construct successful response with data
             return super().construct_response({
@@ -257,6 +286,18 @@ class MongoManagerService(BaseService):
             return super().construct_response(errors["SchemaValidationError"])
         except Exception as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+
+        # try:
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     time_offset = 1/12
+        #     total_count = 0
+
+        #     live_counts = []
+
+        #     endpoint_total = len(collection.find(
+        #         query_filter).distinct('endpoint_id'))
 
         #     for skip_index in range(0, 717):
         #         new_time_offset = time_offset * skip_index
@@ -316,12 +357,11 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            daily_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            daily_counts = self.__data_segmenter(query_filter, number_of_entries,
+                time_offset, endpoint_total, entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -403,12 +443,11 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            weekly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            weekly_counts = self.__data_segmenter(query_filter, number_of_entries,
+                time_offset, endpoint_total, entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -485,12 +524,10 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            monthly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            monthly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
             
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
@@ -565,12 +602,10 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            quarterly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            quarterly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -653,12 +688,10 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].find(
-                query_filter).distinct('endpoint_id'))
+            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            yearly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
-                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            yearly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
 
             # construct successful response with data
             return super().construct_response({
