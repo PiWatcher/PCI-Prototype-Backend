@@ -190,12 +190,16 @@ class MongoManagerService(BaseService):
             room_cursor = super().get_database("Buildings")[query_filter["building"]].find(
                 query_filter, {'count': 1}).sort('_id', DECREASING).skip(skip_counts).limit(limited_entries)
 
+            # add entries
+            for item in room_cursor:
+                room_entries.append(item['count'])
+
             # average entries
             averaged_entries = self.__average_counts_by_time(
                 room_entries, query_filter["timestamp"]["$lte"], new_time_offset, num_of_endpoints)
 
             # append entries to data
-            segmented_data.append(BEGINNING, averaged_entries)
+            segmented_data.insert(BEGINNING, averaged_entries)
 
         # return averaged segmented data
         return segmented_data
@@ -233,7 +237,7 @@ class MongoManagerService(BaseService):
                 room_entries, query_filter["timestamp"]["$lte"], new_time_offset, num_of_endpoints)
 
             # append entries to data
-            segmented_data.append(BEGINNING, averaged_entries)
+            segmented_data.insert(BEGINNING, averaged_entries)
 
         # return averaged segmented data
         return segmented_data
