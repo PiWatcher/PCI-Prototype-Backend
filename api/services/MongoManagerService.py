@@ -23,39 +23,27 @@ class MongoManagerService(BaseService):
                 'data': buildings
             })
 
-        # Internal Server Error
-        except (InternalServerError, Exception):
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
-    def collect_counts_of_buildings(self, query_filter={}):
+    def collect_counts_of_buildings(self, building):
         try:
-            # database_object = self.mongo["Buildings"]
-            building_name = query_filter.get("building_name", None)
-            # collection = database_object[building]
-
             rooms_and_counts_list = []
             rooms_and_counts = {}
             total_count = 0
 
-            if building_name is None:
+            if building is None:
                 raise SchemaValidationError
 
-            rooms_and_counts_cursor = super().get_database("Buildings")[building_name].aggregate(
+            rooms_and_counts_cursor = super().get_database("Buildings")[building].aggregate(
                 [{"$group": {"_id": "$endpoint", "current_count": {"$last": "$count"}}}])
 
             for item in rooms_and_counts_cursor:
                 rooms_and_counts[item["_id"]] = item["current_count"]
                 rooms_and_counts_list.append(item)
 
-            # total_room = len(rooms_and_counts)
-
             for room in rooms_and_counts:
                 total_count += rooms_and_counts[room]
-
-            # json_response = {
-            #     'status': 200,
-            #     'data': rooms_and_counts_list
-            # }
 
             return super().construct_response({
                 'status': 200,
@@ -66,9 +54,12 @@ class MongoManagerService(BaseService):
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
 
-        # Internal Server Error
-        except (InternalServerError, Exception):
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+
+        # # Internal Server Error
+        # except (InternalServerError, Exception):
+        #     return super().construct_response(errors["InternalServerError"])
 
     def insert_entry_by_room(self, data):
         try:
@@ -100,7 +91,13 @@ class MongoManagerService(BaseService):
                 raise SchemaValidationError
 
             # create new entry
-            new_entry = EntryModel().to_json()
+            new_entry = EntryModel(timestamp,
+                                   building,
+                                   building_id,
+                                   count,
+                                   endpoint,
+                                   endpoint_id,
+                                   room_capacity).to_json()
 
             # attempt to insert entry into database
             super().get_database["Buildings"][building].insert_one(new_entry)
@@ -117,16 +114,6 @@ class MongoManagerService(BaseService):
                 'message': f"New entry was added successfully {new_entry}"
             })
 
-            # json_response = {
-            #     'status': 200,
-            #     'timestamp': data['timestamp'],
-            #     'message': f"[{data['building']} ({data['building_id']})] {data['endpoint']} ({data['endpoint_id']}) successfully added it's entry"
-            # }
-
-            # return Response(json.dumps(json_response, default=json_util.default),
-            #                 mimetype='application/json',
-            #                 status=200)
-
         # Schema Validation Error
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
@@ -135,8 +122,11 @@ class MongoManagerService(BaseService):
         except FailedEntryCreationError:
             return super().construct_response(errors["FailedEntryCreationError"])
 
-        except (InternalServerError, Exception):
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+
+        # except (InternalServerError, Exception):
+        #     return super().construct_response(errors["InternalServerError"])
 
     def mock_data_entry(self, building, iterations=10):
 
@@ -251,9 +241,9 @@ class MongoManagerService(BaseService):
                 raise SchemaValidationError
 
             # declare/initialize variables
-            time_offset = 1/12
+            time_offset = 1/6
             total_count = 0
-            number_of_entries = 717
+            number_of_entries = 360
 
             # construct time interval
             current_time = datetime.now()
@@ -270,11 +260,14 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            live_counts = self.__live_data_segmenter(query_filter, number_of_entries,
-                time_offset, endpoint_total)
+            live_counts = self.__live_data_segmenter(query_filter,
+                                                     number_of_entries,
+                                                     time_offset,
+                                                     endpoint_total)
 
             # construct successful response with data
             return super().construct_response({
@@ -284,51 +277,12 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
-        # try:
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     time_offset = 1/12
-        #     total_count = 0
-
-        #     live_counts = []
-
-        #     endpoint_total = len(collection.find(
-        #         query_filter).distinct('endpoint_id'))
-
-        #     for skip_index in range(0, 717):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         live_room_counts_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * endpoint_total).limit(endpoint_total)
-
-        #         for item in live_room_counts_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         live_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': live_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
-
         # except Exception as error:
-        #     json_response = {
-        #         'status': 400,
-        #         'error': f'{error}'
-        #     }
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
+        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_daily_data(self, building, room):
         try:
@@ -357,11 +311,15 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            daily_counts = self.__data_segmenter(query_filter, number_of_entries,
-                time_offset, endpoint_total, entry_offset)
+            daily_counts = self.__data_segmenter(query_filter,
+                                                 number_of_entries,
+                                                 time_offset,
+                                                 endpoint_total,
+                                                 entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -371,52 +329,12 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     daily_counts = []
-
-        #     entry_offset = 60
-        #     time_offset = 5
-
-        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
-
-        #     endpoint_total = len(endpoints)
-
-        #     for skip_index in range(0, 288):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         # skip_count = skip_index * entry_offset
-        #         daily_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-        #         for item in daily_room_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         daily_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': daily_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
-
         # except Exception as error:
-        #     json_response = {
-        #         'status': 400,
-        #         'error': f'{error}'
-        #     }
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
+        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_weekly_data(self, building, room):
         try:
@@ -443,11 +361,15 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            weekly_counts = self.__data_segmenter(query_filter, number_of_entries,
-                time_offset, endpoint_total, entry_offset)
+            weekly_counts = self.__data_segmenter(query_filter,
+                                                  number_of_entries,
+                                                  time_offset,
+                                                  endpoint_total,
+                                                  entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -457,46 +379,12 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     weekly_counts = []
-
-        #     entry_offset = 720
-        #     time_offset = 60
-
-        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
-
-        #     endpoint_total = len(endpoints)
-
-        #     for skip_index in range(0, 168):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         skip_count = skip_index * entry_offset
-        #         weekly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-        #         for item in weekly_room_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         weekly_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': weekly_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
+        # except Exception as error:
+        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_monthly_data(self, building, room):
         try:
@@ -524,59 +412,24 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            monthly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
+            monthly_counts = self.__data_segmenter(query_filter,
+                                                   number_of_entries,
+                                                   time_offset,
+                                                   endpoint_total,
+                                                   entry_offset)
             
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     monthly_counts = []
-
-        #     entry_offset = 720
-        #     time_offset = 60
-
-        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
-
-        #     endpoint_total = len(endpoints)
-
-        #     for skip_index in range(0, 731):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         skip_count = skip_index * entry_offset
-        #         monthly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-        #         for item in monthly_room_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         monthly_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': monthly_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
-
         # except Exception as error:
-        #     json_response = {
-        #         'status': 400,
-        #         'error': f'{error}'
-        #     }
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
+        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_quarterly_data(self, building, room):
         try:
@@ -602,10 +455,15 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            quarterly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
+            quarterly_counts = self.__data_segmenter(query_filter,
+                                                     number_of_entries,
+                                                     time_offset,
+                                                     endpoint_total,
+                                                     entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -615,54 +473,13 @@ class MongoManagerService(BaseService):
 
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
-        
-        # try:
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     quarterly_counts = []
-
-        #     entry_offset = 17280
-        #     time_offset = 1440
-
-        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
-
-        #     endpoint_total = len(endpoints)
-
-        #     for skip_index in range(0, 92):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         skip_count = skip_index * entry_offset
-        #         quarterly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-        #         for item in quarterly_room_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         quarterly_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': quarterly_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
 
         # except Exception as error:
-        #     json_response = {
-        #         'status': 400,
-        #         'error': f'{error}'
-        #     }
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
-
+        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+        
     def get_yearly_data(self, building, room):
         try:
             # Validate schema
@@ -688,10 +505,15 @@ class MongoManagerService(BaseService):
             }
 
             # get the total number of endpoints in room
-            endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
             # grab averaged counts
-            yearly_counts = self.__data_segmenter(query_filter, number_of_entries, time_offset, endpoint_total, entry_offset)
+            yearly_counts = self.__data_segmenter(query_filter,
+                                                  number_of_entries,
+                                                  time_offset,
+                                                  endpoint_total,
+                                                  entry_offset)
 
             # construct successful response with data
             return super().construct_response({
@@ -700,53 +522,9 @@ class MongoManagerService(BaseService):
             })
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
-        except Exception as error:
+
+        except (InternalServerError, Exception) as error:
             return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
-
-        # try:
-        #     database_object = self.mongo["Buildings"]
-        #     building = query_filter["building"]
-        #     collection = database_object[building]
-        #     yearly_counts = []
-
-        #     entry_offset = 17280
-        #     time_offset = 1440
-
-        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
-
-        #     endpoint_total = len(endpoints)
-
-        #     for skip_index in range(0, 368):
-        #         new_time_offset = time_offset * skip_index
-        #         segmented_counts = []
-        #         skip_count = skip_index * entry_offset
-        #         yearly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-        #         for item in yearly_room_cursor:
-        #             segmented_counts.append(item['count'])
-
-        #         yearly_counts.insert(0, self.__average_counts_by_time(
-        #             segmented_counts, current_time, new_time_offset, endpoint_total))
-
-        #     json_response = {
-        #         'status': 200,
-        #         'data': yearly_counts
-        #     }
-
-        #     return Response(json.dumps(json_response, default=json_util.default),
-        #                     mimetype='application/json',
-        #                     status=200)
-
-        # except Exception as error:
-        #     json_response = {
-        #         'status': 400,
-        #         'error': f'{error}'
-        #     }
-
-        # return Response(json.dumps(json_response),
-        #                 mimetype='application/json',
-        #                 status=400)
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
