@@ -212,28 +212,32 @@ class MongoManagerService(BaseService):
         # return averaged segmented data
         return segmented_data
         
-    def get_live_data(self, building, room, current_time):
+    def get_live_data(self, building, room):
         try:
-            # database_object = self.mongo["Buildings"]
-            # collection = database_object[building]
-
-            # declare/initialize variables
-            time_offset = 1/12
-            total_count = 0
-            number_of_entries = 717
-
             # validate schema
             if building is None:
                 raise SchemaValidationError
             if room is None:
                 raise SchemaValidationError
 
+            # declare/initialize variables
+            time_offset = 1/12
+            total_count = 0
+            number_of_entries = 717
+
             # construct time interval
             current_time = datetime.now()
-            interval = current_time - timedelta(minutes = 60)
+            interval = current_time - timedelta(minutes=60)
 
             # construct query filter
-            query_filter = {"timestamp": {"$lte": current_time, "$gte": interval}, "building": building, "endpoint": room}
+            query_filter = {
+                "timestamp": {
+                    "$lte": current_time,
+                    "$gte": interval
+                },
+                "building": building,
+                "endpoint": room
+            }
 
             # get the total number of endpoints in room
             endpoint_total = len(super().get_database("Buildings")[building].find(
@@ -285,235 +289,431 @@ class MongoManagerService(BaseService):
         #                 mimetype='application/json',
         #                 status=400)
 
-    def get_daily_data(self, query_filter, current_time):
+    def get_daily_data(self, building, room):
         try:
-            database_object = self.mongo["Buildings"]
-            building = query_filter["building"]
-            collection = database_object[building]
-            daily_counts = []
+            # Validate schema
+            if building is None:
+                raise SchemaValidationError
+            if room is None:
+                raise SchemaValidationError
 
+            # declare/initialize
             entry_offset = 60
             time_offset = 5
+            number_of_entries = 288
 
-            endpoints = collection.find(query_filter).distinct('endpoint_id')
+            current_time = datetime.now()
+            interval = current_time - timedelta(minutes=1440)
 
-            endpoint_total = len(endpoints)
+            # construct query filter
+            query_filter = {
+                "timestamp": {
+                    "$lte": current_time,
+                    "$gte": interval
+                },
+                "building": building,
+                "endpoint": room
+            }
 
-            for skip_index in range(0, 288):
-                new_time_offset = time_offset * skip_index
-                segmented_counts = []
-                # skip_count = skip_index * entry_offset
-                daily_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+            # get the total number of endpoints in room
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
-                for item in daily_room_cursor:
-                    segmented_counts.append(item['count'])
+            # grab averaged counts
+            daily_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
+                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
 
-                daily_counts.insert(0, self.__average_counts_by_time(
-                    segmented_counts, current_time, new_time_offset, endpoint_total))
-
-            json_response = {
+            # construct successful response with data
+            return super().construct_response({
                 'status': 200,
                 'data': daily_counts
-            }
+            })
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=200)
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except Exception:
+            return super().construct_response(errors["InternalServerError"])
 
-        except Exception as error:
-            json_response = {
-                'status': 400,
-                'error': f'{error}'
-            }
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     daily_counts = []
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+        #     entry_offset = 60
+        #     time_offset = 5
 
-    def get_weekly_data(self, query_filter, current_time):
+        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+        #     endpoint_total = len(endpoints)
+
+        #     for skip_index in range(0, 288):
+        #         new_time_offset = time_offset * skip_index
+        #         segmented_counts = []
+        #         # skip_count = skip_index * entry_offset
+        #         daily_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
+        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
+        #         for item in daily_room_cursor:
+        #             segmented_counts.append(item['count'])
+
+        #         daily_counts.insert(0, self.__average_counts_by_time(
+        #             segmented_counts, current_time, new_time_offset, endpoint_total))
+
+        #     json_response = {
+        #         'status': 200,
+        #         'data': daily_counts
+        #     }
+
+        #     return Response(json.dumps(json_response, default=json_util.default),
+        #                     mimetype='application/json',
+        #                     status=200)
+
+        # except Exception as error:
+        #     json_response = {
+        #         'status': 400,
+        #         'error': f'{error}'
+        #     }
+
+        # return Response(json.dumps(json_response),
+        #                 mimetype='application/json',
+        #                 status=400)
+
+    def get_weekly_data(self, building, room):
         try:
-            database_object = self.mongo["Buildings"]
-            building = query_filter["building"]
-            collection = database_object[building]
-            weekly_counts = []
+            # Validate Schema
+            if building is None:
+                raise SchemaValidationError
+            if room is None:
+                raise SchemaValidationError
 
             entry_offset = 720
             time_offset = 60
+            number_of_entries = 168
 
-            endpoints = collection.find(query_filter).distinct('endpoint_id')
+            current_time = datetime.now()
+            interval = current_time - timedelta(minutes=10080)
 
-            endpoint_total = len(endpoints)
+            query_filter = {
+                'timestamp': {
+                    '$lte': current_time,
+                    '$gte': interval
+                },
+                'building': building,
+                'endpoint': room
+            }
 
-            for skip_index in range(0, 168):
-                new_time_offset = time_offset * skip_index
-                segmented_counts = []
-                skip_count = skip_index * entry_offset
-                weekly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+            # get the total number of endpoints in room
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
-                for item in weekly_room_cursor:
-                    segmented_counts.append(item['count'])
+            # grab averaged counts
+            weekly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
+                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
 
-                weekly_counts.insert(0, self.__average_counts_by_time(
-                    segmented_counts, current_time, new_time_offset, endpoint_total))
-
-            json_response = {
+            # construct successful response with data
+            return super().construct_response({
                 'status': 200,
                 'data': weekly_counts
-            }
+            })
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=200)
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except Exception:
+            return super().construct_response(errors["InternalServerError"])
 
-        except Exception as error:
-            json_response = {
-                'status': 400,
-                'error': f'{error}'
-            }
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     weekly_counts = []
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+        #     entry_offset = 720
+        #     time_offset = 60
 
-    def get_monthly_data(self, query_filter, current_time):
+        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+        #     endpoint_total = len(endpoints)
+
+        #     for skip_index in range(0, 168):
+        #         new_time_offset = time_offset * skip_index
+        #         segmented_counts = []
+        #         skip_count = skip_index * entry_offset
+        #         weekly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
+        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
+        #         for item in weekly_room_cursor:
+        #             segmented_counts.append(item['count'])
+
+        #         weekly_counts.insert(0, self.__average_counts_by_time(
+        #             segmented_counts, current_time, new_time_offset, endpoint_total))
+
+        #     json_response = {
+        #         'status': 200,
+        #         'data': weekly_counts
+        #     }
+
+        #     return Response(json.dumps(json_response, default=json_util.default),
+        #                     mimetype='application/json',
+        #                     status=200)
+
+        # return Response(json.dumps(json_response),
+        #                 mimetype='application/json',
+        #                 status=400)
+
+    def get_monthly_data(self, building, room):
         try:
-            database_object = self.mongo["Buildings"]
-            building = query_filter["building"]
-            collection = database_object[building]
-            monthly_counts = []
-
+            # validate schema
+            if building is None:
+                raise SchemaValidationError
+            if room is None:
+                raise SchemaValidationError
+            
+            # declare/initialize
             entry_offset = 720
             time_offset = 60
+            number_of_entries = 731
 
-            endpoints = collection.find(query_filter).distinct('endpoint_id')
+            current_time = datetime.now()
+            interval = datetime.now() - timedelta(minutes=302400)
 
-            endpoint_total = len(endpoints)
-
-            for skip_index in range(0, 731):
-                new_time_offset = time_offset * skip_index
-                segmented_counts = []
-                skip_count = skip_index * entry_offset
-                monthly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
-
-                for item in monthly_room_cursor:
-                    segmented_counts.append(item['count'])
-
-                monthly_counts.insert(0, self.__average_counts_by_time(
-                    segmented_counts, current_time, new_time_offset, endpoint_total))
-
-            json_response = {
-                'status': 200,
-                'data': monthly_counts
+            query_filter = {
+                'timestamp': {
+                    '$lte': current_time,
+                    '$gte': interval
+                },
+                'building': building,
+                'endpoint': room
             }
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=200)
+            # get the total number of endpoints in room
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
-        except Exception as error:
-            json_response = {
-                'status': 400,
-                'error': f'{error}'
-            }
+            # grab averaged counts
+            monthly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
+                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
+            
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except Exception:
+            return super().construct_response(errors["InternalServerError"])
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     monthly_counts = []
 
-    def get_quarterly_data(self, query_filter, current_time):
+        #     entry_offset = 720
+        #     time_offset = 60
+
+        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+        #     endpoint_total = len(endpoints)
+
+        #     for skip_index in range(0, 731):
+        #         new_time_offset = time_offset * skip_index
+        #         segmented_counts = []
+        #         skip_count = skip_index * entry_offset
+        #         monthly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
+        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
+        #         for item in monthly_room_cursor:
+        #             segmented_counts.append(item['count'])
+
+        #         monthly_counts.insert(0, self.__average_counts_by_time(
+        #             segmented_counts, current_time, new_time_offset, endpoint_total))
+
+        #     json_response = {
+        #         'status': 200,
+        #         'data': monthly_counts
+        #     }
+
+        #     return Response(json.dumps(json_response, default=json_util.default),
+        #                     mimetype='application/json',
+        #                     status=200)
+
+        # except Exception as error:
+        #     json_response = {
+        #         'status': 400,
+        #         'error': f'{error}'
+        #     }
+
+        # return Response(json.dumps(json_response),
+        #                 mimetype='application/json',
+        #                 status=400)
+
+    def get_quarterly_data(self, building, room):
         try:
-            database_object = self.mongo["Buildings"]
-            building = query_filter["building"]
-            collection = database_object[building]
-            quarterly_counts = []
+            if building is None:
+                raise SchemaValidationError
+            if room is None:
+                raise SchemaValidationError
 
             entry_offset = 17280
             time_offset = 1440
+            number_of_entries = 168
 
-            endpoints = collection.find(query_filter).distinct('endpoint_id')
+            current_time = datetime.now()
+            interval = current_time - timedelta(minutes=907200)
 
-            endpoint_total = len(endpoints)
+            query_filter = {
+                'timestamp': {
+                    '$lte': current_time,
+                    '$gte': interval
+                },
+                'building': building,
+                'endpoint': room
+            }
 
-            for skip_index in range(0, 92):
-                new_time_offset = time_offset * skip_index
-                segmented_counts = []
-                skip_count = skip_index * entry_offset
-                quarterly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+            # get the total number of endpoints in room
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
-                for item in quarterly_room_cursor:
-                    segmented_counts.append(item['count'])
+            # grab averaged counts
+            quarterly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
+                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
 
-                quarterly_counts.insert(0, self.__average_counts_by_time(
-                    segmented_counts, current_time, new_time_offset, endpoint_total))
-
-            json_response = {
+            # construct successful response with data
+            return super().construct_response({
                 'status': 200,
                 'data': quarterly_counts
-            }
+            })
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=200)
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except Exception:
+            return super().construct_response(errors["InternalServerError"])
+        
+        # try:
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     quarterly_counts = []
 
-        except Exception as error:
-            json_response = {
-                'status': 400,
-                'error': f'{error}'
-            }
+        #     entry_offset = 17280
+        #     time_offset = 1440
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
 
-    def get_yearly_data(self, query_filter, current_time):
+        #     endpoint_total = len(endpoints)
+
+        #     for skip_index in range(0, 92):
+        #         new_time_offset = time_offset * skip_index
+        #         segmented_counts = []
+        #         skip_count = skip_index * entry_offset
+        #         quarterly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
+        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
+        #         for item in quarterly_room_cursor:
+        #             segmented_counts.append(item['count'])
+
+        #         quarterly_counts.insert(0, self.__average_counts_by_time(
+        #             segmented_counts, current_time, new_time_offset, endpoint_total))
+
+        #     json_response = {
+        #         'status': 200,
+        #         'data': quarterly_counts
+        #     }
+
+        #     return Response(json.dumps(json_response, default=json_util.default),
+        #                     mimetype='application/json',
+        #                     status=200)
+
+        # except Exception as error:
+        #     json_response = {
+        #         'status': 400,
+        #         'error': f'{error}'
+        #     }
+
+        # return Response(json.dumps(json_response),
+        #                 mimetype='application/json',
+        #                 status=400)
+
+    def get_yearly_data(self, building, room):
         try:
-            database_object = self.mongo["Buildings"]
-            building = query_filter["building"]
-            collection = database_object[building]
-            yearly_counts = []
+            # Validate schema
+            if building is None:
+                raise SchemaValidationError
+            if room is None:
+                raise SchemaValidationError
 
             entry_offset = 17280
             time_offset = 1440
+            number_of_entries = 368
 
-            endpoints = collection.find(query_filter).distinct('endpoint_id')
+            current_time = datetime.now()
+            interval = current_time - timedelta(minutes=3628800)
 
-            endpoint_total = len(endpoints)
+            query_filter = {
+                'timestamp': {
+                    '$lte': current_time,
+                    '$gte': interval
+                },
+                'building': building,
+                'endpoint': room
+            }
 
-            for skip_index in range(0, 368):
-                new_time_offset = time_offset * skip_index
-                segmented_counts = []
-                skip_count = skip_index * entry_offset
-                yearly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
-                    skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+            # get the total number of endpoints in room
+            endpoint_total = len(super().get_database("Buildings")[building].find(
+                query_filter).distinct('endpoint_id'))
 
-                for item in yearly_room_cursor:
-                    segmented_counts.append(item['count'])
+            # grab averaged counts
+            yearly_counts = self.__data_segmenter(query_filter=query_filter, upper_limit=number_of_entries,
+                time_offset=time_offset, num_of_endpoints=endpoint_total, entry_offset=entry_offset)
 
-                yearly_counts.insert(0, self.__average_counts_by_time(
-                    segmented_counts, current_time, new_time_offset, endpoint_total))
-
-            json_response = {
+            # construct successful response with data
+            return super().construct_response({
                 'status': 200,
                 'data': yearly_counts
-            }
+            })
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except Excpetion:
+            return super().construct_response(errors["InternalServerError"])
 
-            return Response(json.dumps(json_response, default=json_util.default),
-                            mimetype='application/json',
-                            status=200)
+        # try:
+        #     database_object = self.mongo["Buildings"]
+        #     building = query_filter["building"]
+        #     collection = database_object[building]
+        #     yearly_counts = []
 
-        except Exception as error:
-            json_response = {
-                'status': 400,
-                'error': f'{error}'
-            }
+        #     entry_offset = 17280
+        #     time_offset = 1440
 
-        return Response(json.dumps(json_response),
-                        mimetype='application/json',
-                        status=400)
+        #     endpoints = collection.find(query_filter).distinct('endpoint_id')
+
+        #     endpoint_total = len(endpoints)
+
+        #     for skip_index in range(0, 368):
+        #         new_time_offset = time_offset * skip_index
+        #         segmented_counts = []
+        #         skip_count = skip_index * entry_offset
+        #         yearly_room_cursor = collection.find(query_filter).sort('_id', -1).skip(
+        #             skip_index * entry_offset * endpoint_total).limit(entry_offset * endpoint_total)
+
+        #         for item in yearly_room_cursor:
+        #             segmented_counts.append(item['count'])
+
+        #         yearly_counts.insert(0, self.__average_counts_by_time(
+        #             segmented_counts, current_time, new_time_offset, endpoint_total))
+
+        #     json_response = {
+        #         'status': 200,
+        #         'data': yearly_counts
+        #     }
+
+        #     return Response(json.dumps(json_response, default=json_util.default),
+        #                     mimetype='application/json',
+        #                     status=200)
+
+        # except Exception as error:
+        #     json_response = {
+        #         'status': 400,
+        #         'error': f'{error}'
+        #     }
+
+        # return Response(json.dumps(json_response),
+        #                 mimetype='application/json',
+        #                 status=400)
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
         total_count = 0
