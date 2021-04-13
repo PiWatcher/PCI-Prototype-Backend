@@ -1,4 +1,4 @@
-class EntryModel():
+class Entry():
     def __init__(self, timestamp, building, building_id, count, endpoint, endpoint_id, room_capacity):
         self.timestamp = timestamp
         self.building = building

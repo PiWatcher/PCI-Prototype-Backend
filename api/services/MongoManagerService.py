@@ -7,7 +7,7 @@ from bson import json_util
 from datetime import timedelta, datetime
 
 from api.services.BaseService import BaseService
-from api.models.EntryModel import EntryModel
+from api.models.EntryModel import Entry
 from api.errors.errors import *
 
 class MongoManagerService(BaseService):
@@ -61,15 +61,8 @@ class MongoManagerService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
 
-        # # Internal Server Error
-        # except (InternalServerError, Exception):
-        #     return super().construct_response(errors["InternalServerError"])
-
     def insert_entry_by_room(self, data):
         try:
-            # database_object = self.mongo["Buildings"]
-            # collection_object = database_object[data["building"]]
-
             timestamp = data.get("timestamp", None)
             building = data.get("building", None)
             building_id = data.get("building_id", None)
@@ -95,18 +88,17 @@ class MongoManagerService(BaseService):
                 raise SchemaValidationError
 
             # create new entry
-            new_entry = EntryModel(timestamp,
-                                   building,
-                                   building_id,
-                                   count,
-                                   endpoint,
-                                   endpoint_id,
-                                   room_capacity).to_json()
+            new_entry = Entry(timestamp,
+                              building,
+                              building_id,
+                              count,
+                              endpoint,
+                              endpoint_id,
+                              room_capacity).to_json()
 
             # attempt to insert entry into database
-            super().get_database["Buildings"][building].insert_one(new_entry)
+            super().get_database("Buildings")[building].insert_one(new_entry)
 
-            # check if entry is in database
             check_entry = super().get_database("Buildings")[building].find_one(new_entry)
 
             if check_entry is None:
@@ -115,7 +107,7 @@ class MongoManagerService(BaseService):
             return super().construct_response({
                 'status': 200,
                 'timestamp': timestamp,
-                'message': f"New entry was added successfully {new_entry}"
+                'message': f"New entry was added successfully {check_entry}"
             })
 
         # Schema Validation Error
@@ -129,15 +121,13 @@ class MongoManagerService(BaseService):
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
-            return super().construct_response(error_message)
 
-        # except (InternalServerError, Exception):
-        #     return super().construct_response(errors["InternalServerError"])
+            return super().construct_response(error_message)
 
     def mock_data_entry(self, building, iterations=10):
 
         for iteration in range(0, iterations):
-            self.insert_entry_by_room(
+            response = self.insert_entry_by_room(
                 self.__prepare_mock_data(building, iterations))
 
         json_response = {
@@ -165,46 +155,7 @@ class MongoManagerService(BaseService):
 
         return data
 
-    def __live_data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints):
-        # constants
-        DECREASING = -1
-        BEGINNING = 0
-        
-        segmented_data = []
-        
-        # iterate through and segment, average, then append data
-        for skip_index in range(0, upper_limit):
-            # calculate new time interval
-            new_time_offset = time_offset * skip_index
-            
-            # prepare data segment list
-            room_entries = []
-
-            # skip by how many entries
-            skip_counts = skip_index * num_of_endpoints
-
-            # limit entries per query
-            limited_entries = num_of_endpoints
-
-            # grab cursor for rooms
-            room_cursor = super().get_database("Buildings")[query_filter["building"]].find(
-                query_filter, {'count': 1}).sort('_id', DECREASING).skip(skip_counts).limit(limited_entries)
-
-            # add entries
-            for item in room_cursor:
-                room_entries.append(item['count'])
-
-            # average entries
-            averaged_entries = self.__average_counts_by_time(
-                room_entries, query_filter["timestamp"]["$lte"], new_time_offset, num_of_endpoints)
-
-            # append entries to data
-            segmented_data.insert(BEGINNING, averaged_entries)
-
-        # return averaged segmented data
-        return segmented_data
-
-    def __data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints, entry_offset):
+    def __data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints, entry_offset=None, is_live=False):
         # constants
         DECREASING = -1
         BEGINNING = 0
@@ -218,11 +169,18 @@ class MongoManagerService(BaseService):
 
             room_entries = []
 
-            # skip by how many entries
-            skip_counts = skip_index * entry_offset * num_of_endpoints
+            if is_live:
+                # skip by how many entries
+                skip_counts = skip_index * num_of_endpoints
 
-            # limit entries per query
-            limited_entries = entry_offset * num_of_endpoints
+                # limit entries per query
+                limited_entries = num_of_endpoints
+            else:
+                # skip by how many entries
+                skip_counts = skip_index * entry_offset * num_of_endpoints
+
+                # limit entries per query
+                limited_entries = entry_offset * num_of_endpoints
 
             # grab cursor for rooms
             room_cursor = super().get_database("Buildings")[query_filter["building"]].find(
@@ -251,9 +209,8 @@ class MongoManagerService(BaseService):
                 raise SchemaValidationError
 
             # declare/initialize variables
-            time_offset = 1/6
-            total_count = 0
-            number_of_entries = 360
+            time_offset = 1/12
+            number_of_entries = 720
 
             # construct time interval
             current_time = datetime.now()
@@ -273,10 +230,11 @@ class MongoManagerService(BaseService):
             endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            live_counts = self.__live_data_segmenter(query_filter,
+            live_counts = self.__data_segmenter(query_filter,
                                                      number_of_entries,
                                                      time_offset,
-                                                     endpoint_total)
+                                                     endpoint_total,
+                                                     is_live=True)
 
             # construct successful response with data
             return super().construct_response({
@@ -291,9 +249,6 @@ class MongoManagerService(BaseService):
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
-
-        # except Exception as error:
-        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_daily_data(self, building, room):
         try:
@@ -345,9 +300,6 @@ class MongoManagerService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
 
-        # except Exception as error:
-        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
-
     def get_weekly_data(self, building, room):
         try:
             # Validate Schema
@@ -396,9 +348,6 @@ class MongoManagerService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
 
-        # except Exception as error:
-        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
-
     def get_monthly_data(self, building, room):
         try:
             # validate schema
@@ -434,6 +383,12 @@ class MongoManagerService(BaseService):
                                                    endpoint_total,
                                                    entry_offset)
             
+            # construct successful response with data
+            return super().construct_response({
+                'status': 200,
+                'data': monthly_counts 
+            })
+
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
 
@@ -441,9 +396,6 @@ class MongoManagerService(BaseService):
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
-
-        # except Exception as error:
-        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
 
     def get_quarterly_data(self, building, room):
         try:
@@ -491,9 +443,7 @@ class MongoManagerService(BaseService):
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
-
-        # except Exception as error:
-        #     return super().construct_response(errors["InternalServerError"].update("error", f'{error}'))
+        
         
     def get_yearly_data(self, building, room):
         try:
@@ -534,6 +484,7 @@ class MongoManagerService(BaseService):
                 'status': 200,
                 'data': yearly_counts
             })
+
         except SchemaValidationError:
             return super().construct_response(errors["SchemaValidationError"])
 

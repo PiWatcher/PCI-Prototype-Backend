@@ -50,8 +50,11 @@ class LoginAuthenticationService(BaseService):
 
         except RoleAlreadyExistsError:
             return super().construct_response(errors["RoleAlreadyExistsError"])
-        except (InternalServerError, Exception):
-            return super().construct_response(errors["InternalServerError"])
+
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
 
     def __grab_user(self, email):
         # find user in the database by email
@@ -85,8 +88,10 @@ class LoginAuthenticationService(BaseService):
                 'users': user_accounts
             })
 
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
 
     def __grab_role(self, role_name):
         # attempt to grab role from database and return it
@@ -108,8 +113,10 @@ class LoginAuthenticationService(BaseService):
                 'roles': roles
             })
 
-        except Exception:
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
 
     def __signin(self, data):
         try:
@@ -122,11 +129,13 @@ class LoginAuthenticationService(BaseService):
                 if user is None:
                     raise EmailDoesNotExistError
 
+                role = self.__grab_role(user['role'])
+
                 # successful response
                 return super().construct_response({
                     'status': 200,
                     'full_name': user['full_name'],
-                    'role': user['role'],
+                    'role': role,
                     'jwt_token': 'random_jwt_token'
                 })
             else:
@@ -136,8 +145,10 @@ class LoginAuthenticationService(BaseService):
             return super().construct_response(errors["UnauthorizedError"])
         except EmailDoesNotExistError:
             return super().construct_response(errors["EmailDoesNotExistError"])
-        except Exception as error:
-            return super().construct_response(errors["InternalServerError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
 
     def __signup(self, data):
         try:
@@ -169,8 +180,10 @@ class LoginAuthenticationService(BaseService):
 
         except EmailAlreadyExistsError:
             return super().construct_response(errors['EmailAlreadyExistsError'])
-        except (InternalServerError, Exception):
-            return super().construct_response(errors['InternalServerError'])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
         
     def __update_user_role(self, data):
         try:
