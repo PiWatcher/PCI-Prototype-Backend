@@ -21,6 +21,6 @@ class ApiAuthUsersUpdate(Resource):
 
         # jwt_token is used to check permissions
 
-        response = las().handle_updating_user(json_body)
+        response = las().handle_updating_user_role(json_body)
 
         return response
