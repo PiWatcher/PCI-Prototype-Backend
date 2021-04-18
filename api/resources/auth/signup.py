@@ -8,8 +8,3 @@ class ApiAuthSignup(Resource):
     def post(self):
         response = las().handle_signup(request.json)
         return response
-
-class ApiAuthSignin(Resource):
-    def post(self):
-        response = las().handle_signin(request.json)
-        return response

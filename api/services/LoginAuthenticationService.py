@@ -23,6 +23,9 @@ class LoginAuthenticationService(BaseService):
     def handle_updating_user_role(self, data):
         return self.__update_user_role(data)
 
+    def handle_updating_password(self, data):
+        return self.__update_user_password(data)
+
     def __create_role(self, data):
         try:
             # check if role already exists
@@ -230,7 +233,59 @@ class LoginAuthenticationService(BaseService):
             return super().construct_response(errors["RoleDoesNotExistError"])
         except (InternalServerError, Exception):
             return super().construct_response(errors["InternalServerError"])
-    
+
+    def __update_user_password(self, data):
+        try:
+            # validate schema of data
+            email = data.get("email", None)
+            password = data.get("password", None)
+            new_password = data.get("new_password", None)
+
+            # validate email is there
+            if email is None:
+                raise SchemaValidationError
+
+            # search for user in database
+            user = self.__grab_user(email)
+
+            # raise error is user does not exist
+            if user is None:
+                raise EmailDoesNotExistError
+
+            # create current account
+            if not Account(**user).check_password_hash(password):
+                raise UnauthorizedError
+
+            # create a new account with new password
+            updated_user = Account(
+                email=user["email"],
+                password=new_password,
+                full_name=user["full_name"],
+                role=user["role"]
+            ).hash_password()
+
+            # update user in database
+            super().get_database('Users')['users'].update_one(
+                {"email": data['email']},
+                {"$set": {"password": updated_user.get_password()}}
+            )
+
+            # create response object
+            return super().construct_response({
+                'status': 200,
+                'description': f'{updated_user.get_email()} password was updated'
+            })
+
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except UnauthorizedError:
+            return super().construct_response(errors["UnauthorizedError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message['error'] = f'{error}'
+            return super().construct_response(error_message)
+        
+
     def __verify_login(self, email, password):
 
         potential_user = self.__grab_user(email)

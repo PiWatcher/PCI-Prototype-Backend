@@ -24,3 +24,11 @@ class ApiAuthUsersUpdate(Resource):
         response = las().handle_updating_user_role(json_body)
 
         return response
+
+class ApiAuthUsersUpdatePassword(Resource):
+    def post(self):
+        json_body = request.json
+
+        response = las().handle_updating_password(json_body)
+
+        return response
