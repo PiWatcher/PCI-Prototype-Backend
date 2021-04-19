@@ -23,3 +23,13 @@ class ApiAuthRoles(Resource):
         response = las().handle_creating_roles(json_body)
 
         return response
+
+    def delete(self):
+        jwt_token = request.args.get('jwt_token', type=str)
+        json_body = request.json
+
+        # jwt_token communicates with service to check for valid login session
+
+        response = las().handle_deleting_role(json_body)
+
+        return response

@@ -6,8 +6,6 @@ from api.resources.auth.signin import ApiAuthSignin
 from api.resources.auth.signup import ApiAuthSignup
 from api.resources.auth.signout import ApiAuthSignout
 
-from api.resources.auth.verify.resetcode import ApiAuthVerifyResetCode
-
 from api.resources.auth.users import ApiAuthUsers, ApiAuthUsersUpdate, ApiAuthUsersUpdatePassword
 
 from api.resources.auth.roles import ApiAuthRoles

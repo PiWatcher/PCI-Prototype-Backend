@@ -13,6 +13,16 @@ class ApiAuthUsers(Resource):
         response = las().handle_grabbing_users()
 
         return response
+    
+    def delete(self):
+        jwt_token = request.args.get('jwt_token', type=str)
+        json_body = request.json
+
+        # jwt_token to check permissions
+        
+        response = las().handle_deleting_user(json_body)
+
+        return response
 
 class ApiAuthUsersUpdate(Resource):
     def post(self):
