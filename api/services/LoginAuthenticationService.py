@@ -285,7 +285,6 @@ class LoginAuthenticationService(BaseService):
             error_message['error'] = f'{error}'
             return super().construct_response(error_message)
         
-
     def __verify_login(self, email, password):
 
         potential_user = self.__grab_user(email)

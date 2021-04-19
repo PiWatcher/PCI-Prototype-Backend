@@ -7,5 +7,4 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 class ApiAuthVerifyResetCode(Resource):
     def get(self):
         
-
         return None

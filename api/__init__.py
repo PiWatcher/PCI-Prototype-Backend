@@ -16,8 +16,11 @@ api.add_resource(ApiBaseResource, '')
 # authentication resources
 api.add_resource(ApiAuthSignup, '/auth/signup')
 api.add_resource(ApiAuthSignin, '/auth/signin')
+api.add_resource(ApiAuthSignout, '/auth/signout')
+api.add_resource(ApiAuthVerifyResetCode, '/auth/verify/resetcode')
 api.add_resource(ApiAuthUsers, '/auth/users')
 api.add_resource(ApiAuthUsersUpdate, '/auth/users/update')
+api.add_resource(ApiAuthUsersUpdatePassword, '/auth/users/update/password')
 api.add_resource(ApiAuthRoles, '/auth/roles')
 
 # data resources
