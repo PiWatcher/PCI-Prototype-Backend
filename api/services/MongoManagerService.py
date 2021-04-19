@@ -38,7 +38,17 @@ class MongoManagerService(BaseService):
                 raise SchemaValidationError
 
             rooms_and_counts_cursor = super().get_database("Buildings")[building].aggregate(
-                [{"$group": {"_id": "$endpoint", "room_capacity": "$room_capacity", "current_count": {"$last": "$count"}}}])
+                [{
+                    "$group": {
+                        "_id": "$endpoint",
+                        "room_capacity": {
+                            "$push": "$room_capacity"
+                        },
+                        "current_count": {
+                            "$last": "$count"
+                            }
+                        }
+                }])
 
             for item in rooms_and_counts_cursor:
                 rooms_and_counts[item["_id"]] = item["current_count"]
