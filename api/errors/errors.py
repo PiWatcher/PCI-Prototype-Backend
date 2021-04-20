@@ -10,7 +10,13 @@ class FailedEntryCreationError(Exception):
 class FailedRoleCreationError(Exception):
     pass
 
+class FailedRoleDeletionError(Exception):
+    pass
+
 class FailedUserCreationError(Exception):
+    pass
+
+class FailedUserDeletionError(Exception):
     pass
 
 class EmailAlreadyExistsError(Exception):
@@ -48,9 +54,17 @@ errors = {
         "status": 400,
         "message": "Role failed to create. Try again."
     },
+    "FailerRoleDeleteError": {
+        "status": 400,
+        "message": "Role failed to delete. Try again."
+    },
     "FailedUserCreationError": {
         "status": 400,
         "message": "User failed to create. Try again."
+    },
+    "FailedUserDeletionError": {
+        "status": 400,
+        "message": "User failed to delete. Try again."
     },
     "EmailAlreadyExistsError": {
         "status": 400,

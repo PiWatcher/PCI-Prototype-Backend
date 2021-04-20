@@ -2,10 +2,11 @@ from flask import jsonify, request
 from flask_restful import Resource
 
 # authentication resources
-from api.resources.auth import ApiAuthSignin
-from api.resources.auth import ApiAuthSignup
+from api.resources.auth.signin import ApiAuthSignin
+from api.resources.auth.signup import ApiAuthSignup
+from api.resources.auth.signout import ApiAuthSignout
 
-from api.resources.auth.users import ApiAuthUsers, ApiAuthUsersUpdate
+from api.resources.auth.users import ApiAuthUsers, ApiAuthUsersUpdate, ApiAuthUsersUpdatePassword
 
 from api.resources.auth.roles import ApiAuthRoles
 

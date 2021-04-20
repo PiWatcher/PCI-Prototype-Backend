@@ -26,6 +26,9 @@ class Account():
         self.email = email
         return self
 
+    def get_password(self):
+        return self.password
+
     def set_password(self, password):
         self.password = password
 

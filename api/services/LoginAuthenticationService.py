@@ -8,6 +8,12 @@ class LoginAuthenticationService(BaseService):
     def handle_creating_roles(self, data):
         return self.__create_role(data)
 
+    def handle_deleting_role(self, data):
+        return self.__delete_role(data)
+
+    def handle_deleting_user(self, data):
+        return self.__delete_user(data)
+
     def handle_grabbing_users(self):
         return self.__grab_users()
 
@@ -22,6 +28,9 @@ class LoginAuthenticationService(BaseService):
 
     def handle_updating_user_role(self, data):
         return self.__update_user_role(data)
+
+    def handle_updating_password(self, data):
+        return self.__update_user_password(data)
 
     def __create_role(self, data):
         try:
@@ -51,6 +60,86 @@ class LoginAuthenticationService(BaseService):
         except RoleAlreadyExistsError:
             return super().construct_response(errors["RoleAlreadyExistsError"])
 
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
+
+    def __delete_role(self, data):
+        try:
+            # grab roles from data
+            role_name = data.get("role_name", None)
+
+            # Validate schema
+            if role_name is None:
+                raise SchemaValidationError
+
+            # grab role from mongo database
+            role = self.__grab_role(role_name)
+
+            # check if role exists
+            if role is None:
+                raise RoleDoesNotExistError
+            
+            # delete role from database
+            super().get_database("Users")["roles"].delete_one({
+                "role_name": role_name
+            })
+
+            # check if role is still in database
+            if self.__grab_role(role_name) is not None:
+                raise FailedRoleDeletionError
+            
+            return super().construct_response({
+                'status': 200,
+                'message': f'Successfully deleted {role_name} from roles.'
+            })
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except RoleDoesNotExistError:
+            return super().construct_response(errors["RoleDoesNotExistError"])
+        except FailedRoleDeletionError:
+            return super().construct_response(errors["FailedRoleDeletionError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
+
+    def __delete_user(self, data):
+        try:
+            # grab email from data
+            email = data.get("email", None)
+
+            # validate schema
+            if email is None:
+                raise SchemaValidationError
+
+            # grab user from database
+            user = self.__grab_user(email)
+
+            # check if user exists
+            if user is None:
+                raise EmailDoesNotExistError
+
+            # delete user from database
+            super().get_database("Users")["users"].delete_one({
+                "email": email
+            })
+
+            # check if user is still in database
+            if self.__grab_user(email) is not None:
+                raise FailedUserDeletionError
+            
+            return super().construct_response({
+                'status': 200,
+                'message': f'Successfully deleted {email} from database'
+            })
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except EmailDoesNotExistError:
+            return super().construct_response(errors["EmailDoesNotExistError"])
+        except FailedUserDeletionError:
+            return super().construct_response(errors["FailedUserDeletionError"])
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
@@ -230,7 +319,58 @@ class LoginAuthenticationService(BaseService):
             return super().construct_response(errors["RoleDoesNotExistError"])
         except (InternalServerError, Exception):
             return super().construct_response(errors["InternalServerError"])
-    
+
+    def __update_user_password(self, data):
+        try:
+            # validate schema of data
+            email = data.get("email", None)
+            password = data.get("password", None)
+            new_password = data.get("new_password", None)
+
+            # validate email is there
+            if email is None:
+                raise SchemaValidationError
+
+            # search for user in database
+            user = self.__grab_user(email)
+
+            # raise error is user does not exist
+            if user is None:
+                raise EmailDoesNotExistError
+
+            # create current account
+            if not Account(**user).check_password_hash(password):
+                raise UnauthorizedError
+
+            # create a new account with new password
+            updated_user = Account(
+                email=user["email"],
+                password=new_password,
+                full_name=user["full_name"],
+                role=user["role"]
+            ).hash_password()
+
+            # update user in database
+            super().get_database('Users')['users'].update_one(
+                {"email": data['email']},
+                {"$set": {"password": updated_user.get_password()}}
+            )
+
+            # create response object
+            return super().construct_response({
+                'status': 200,
+                'description': f'{updated_user.get_email()} password was updated'
+            })
+
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
+        except UnauthorizedError:
+            return super().construct_response(errors["UnauthorizedError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message['error'] = f'{error}'
+            return super().construct_response(error_message)
+        
     def __verify_login(self, email, password):
 
         potential_user = self.__grab_user(email)
