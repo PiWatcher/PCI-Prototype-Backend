@@ -2,6 +2,9 @@ from api.services.BaseService import BaseService
 from api.models.AccountModel import Account
 from api.models.RoleModel import Role
 from api.errors.errors import *
+from flask_jwt_extended import create_access_token
+
+import datetime
 
 class LoginAuthenticationService(BaseService):
 
@@ -31,6 +34,15 @@ class LoginAuthenticationService(BaseService):
 
     def handle_updating_password(self, data):
         return self.__update_user_password(data)
+
+    def validate_permission(self, email):
+        potential_user = self.__grab_user(email)
+        user_role = self.__grab_role(potential_user["role"])
+
+        if user_role['is_admin']:
+            return True
+        
+        return False
 
     def __create_role(self, data):
         try:
@@ -218,6 +230,11 @@ class LoginAuthenticationService(BaseService):
                 if user is None:
                     raise EmailDoesNotExistError
 
+                # construct JWT token
+                expires = datetime.timedelta(days=7)
+                access_token = create_access_token(identity=user['email'],
+                                                   expires_delta=expires)
+
                 role = self.__grab_role(user['role'])
 
                 # successful response
@@ -225,7 +242,7 @@ class LoginAuthenticationService(BaseService):
                     'status': 200,
                     'full_name': user['full_name'],
                     'role': role,
-                    'jwt_token': 'random_jwt_token'
+                    'jwt_token': access_token
                 })
             else:
                 raise UnauthorizedError
