@@ -2,6 +2,7 @@ from api.resources import *
 from flask_restful import Api
 from pymongo import MongoClient
 from api.models.RoleModel import Role
+from api.models.AccountModel import Account
 
 import config
 
@@ -31,13 +32,24 @@ if public_role is None:
         Role("public", False, False).to_json()
     )
 
+# check if default admin is created
+default_admin = mongo["Users"]["users"].find_one({
+    'email': 'iotadmin@nau.edu'
+}, {"_id": 0})
+
+# create if there isn't
+if default_admin is None:
+    mongo["Users"]["users"].insert_one(
+        Account('iotadmin@nau.edu', 'password', 'Administrator', 'admin').hash_password().to_json()
+    )
+
 # Add resource to api
 api.add_resource(ApiBaseResource, '')
 
 # authentication resources
 api.add_resource(ApiAuthSignup, '/auth/signup')
 api.add_resource(ApiAuthSignin, '/auth/signin')
-api.add_resource(ApiAuthSignout, '/auth/signout')
+api.add_resource(ApiAuthToken, '/auth/token')
 api.add_resource(ApiAuthUsers, '/auth/users')
 api.add_resource(ApiAuthUsersUpdate, '/auth/users/update')
 api.add_resource(ApiAuthUsersUpdatePassword, '/auth/users/update/password')

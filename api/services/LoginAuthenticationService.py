@@ -26,14 +26,17 @@ class LoginAuthenticationService(BaseService):
     def handle_signin(self, data):
         return self.__signin(data)
 
+    def handle_token_signin(self, data):
+        return self.__token_signin(data)
+
     def handle_signup(self, data):
         return self.__signup(data) 
 
     def handle_updating_user_role(self, data):
         return self.__update_user_role(data)
 
-    def handle_updating_password(self, data):
-        return self.__update_user_password(data)
+    def handle_updating_password(self, email, data):
+        return self.__update_user_password(email, data)
 
     def validate_permission(self, email):
         potential_user = self.__grab_user(email)
@@ -291,6 +294,29 @@ class LoginAuthenticationService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
         
+    def __token_signin(self, data):
+        try:        
+            user = self.__grab_user(data)
+
+            if user is None:
+                raise EmailDoesNotExistError
+            
+            role = self.__grab_role(user['role'])
+
+            return super().construct_response({
+                'status': 200,
+                'full_name': user['full_name'],
+                'role': role,
+            })
+        
+        except EmailDoesNotExistError:
+            return super().construct_response(errors["EmailDoesNotExistError"])
+        except (InternalServerError, Exception) as error:
+            error_message = errors["InternalServerError"]
+            error_message["error"] = f'{error}'
+            return super().construct_response(error_message)
+
+
     def __update_user_role(self, data):
         try:
             # check if user exists
@@ -337,10 +363,9 @@ class LoginAuthenticationService(BaseService):
         except (InternalServerError, Exception):
             return super().construct_response(errors["InternalServerError"])
 
-    def __update_user_password(self, data):
+    def __update_user_password(self, email, data):
         try:
             # validate schema of data
-            email = data.get("email", None)
             password = data.get("password", None)
             new_password = data.get("new_password", None)
 
@@ -369,7 +394,7 @@ class LoginAuthenticationService(BaseService):
 
             # update user in database
             super().get_database('Users')['users'].update_one(
-                {"email": data['email']},
+                {"email": data},
                 {"$set": {"password": updated_user.get_password()}}
             )
 
