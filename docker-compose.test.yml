@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  pci-backend-test:
+    container_name: pci-backend-testing-suite
+    command: python -m unittest discover -s tests -p "test*.py"
+    build:
+      context: .
+      dockerfile: DockerfileTest
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb-test
+    networks:
+      - backend_test
+
+  mongodb-test:
+    image: mongo:4.0.8
+    container_name: mongodb-test
+    restart: unless-stopped 
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${ROOT_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${ROOT_PASS}"
+      MONGODB_DATA_DIR: /data/test/db
+      MONGODB_LOG_DIR: /dev/null
+    volumes:
+      - mongodb_testdata:/data/test/db
+    networks:
+      - backend_test
+
+volumes:
+  mongodb_testdata:
+    driver: local
+
+networks:
+  backend_test:
+    driver: bridge
+
