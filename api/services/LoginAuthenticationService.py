@@ -224,14 +224,19 @@ class LoginAuthenticationService(BaseService):
 
     def __signin(self, data):
         try:
-            # check verify login
-            if self.__verify_login(data['email'], data['password']):
-                # grab user from database
-                user = self.__grab_user(data['email'])
+            email = data.get("email", None)
+            password = data.get("password", None)
 
-                # check if user exists
-                if user is None:
-                    raise EmailDoesNotExistError
+            if email is None:
+                raise SchemaValidationError
+
+            if password is None:
+                raise SchemaValidationError
+
+            # check verify login
+            if self.__verify_login(email, password):
+                # grab user from database
+                user = self.__grab_user(email)
 
                 # construct JWT token
                 expires = datetime.timedelta(days=7)
@@ -250,10 +255,10 @@ class LoginAuthenticationService(BaseService):
             else:
                 raise UnauthorizedError
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except UnauthorizedError:
             return super().construct_response(errors["UnauthorizedError"])
-        except EmailDoesNotExistError:
-            return super().construct_response(errors["EmailDoesNotExistError"])
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
