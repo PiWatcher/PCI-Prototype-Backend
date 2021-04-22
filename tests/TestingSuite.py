@@ -23,5 +23,4 @@ class BaseTestingSuite(unittest.TestCase):
         databases.remove("local")
 
         for database in databases:
-            print(database)
             self.database.drop_database(database)

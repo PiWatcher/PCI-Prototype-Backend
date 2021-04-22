@@ -261,8 +261,21 @@ class LoginAuthenticationService(BaseService):
 
     def __signup(self, data):
         try:
+            email = data.get("email", None)
+            password = data.get("password", None)
+            full_name = data.get("full_name", None)
+
+            if email is None:
+                raise SchemaValidationError
+            
+            if password is None:
+                raise SchemaValidationError
+
+            if full_name is None:
+                raise SchemaValidationError
+
             # check if user exists
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # raise error if user already exists
             if user is not None:
@@ -274,7 +287,7 @@ class LoginAuthenticationService(BaseService):
             )
 
             # check if account in database
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # if user was not created
             if user is None:
@@ -287,6 +300,8 @@ class LoginAuthenticationService(BaseService):
                 'message': f'New {user["role"]} account was created!'
             })
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except EmailAlreadyExistsError:
             return super().construct_response(errors['EmailAlreadyExistsError'])
         except (InternalServerError, Exception) as error:
