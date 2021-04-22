@@ -10,6 +10,7 @@ class BaseConfig():
 class DevelopmentConfig(BaseConfig):
     FLASK_ENV = "development"
     DEBUG = True
+    JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
     MONGO_USER = os.environ["MONGO_USER"]
     MONGO_PASS = os.environ["MONGO_PASS"]
     MONGO_HOSTNAME = os.environ["MONGO_HOSTNAME"]
@@ -18,6 +19,7 @@ class DevelopmentConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     FLASK_ENV = "production"
+    JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
     MONGO_USER = os.environ["MONGO_USER"]
     MONGO_PASS = os.environ["MONGO_PASS"]
     MONGO_HOSTNAME = os.environ["MONGO_HOSTNAME"]
@@ -28,6 +30,7 @@ class TestingConfig(BaseConfig):
     FLASK_ENV = "development"
     TESTING = True
     DEBUG = True
+    JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]
     MONGO_USER = os.environ["MONGO_USER"]
     MONGO_PASS = os.environ["MONGO_PASS"]
     MONGO_HOSTNAME = os.environ["MONGO_HOSTNAME"]

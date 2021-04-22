@@ -1,35 +1,43 @@
 from flask import jsonify, request
 from flask_restful import Resource
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from api.services.MongoManagerService import MongoManagerService as mms
 from api.services.LoginAuthenticationService import LoginAuthenticationService as las
+from api.errors.errors import *
 
 class ApiAuthRoles(Resource):
+    @jwt_required()
     def get(self):
-        jwt_token = request.args.get('jwt_token', type=str)
+        user_email = get_jwt_identity()
 
-        # jwt_token communicates with service to check for valid login session
-
-        response = las().handle_grabbing_roles()
+        if las().validate_permission(user_email):
+            response = las().handle_grabbing_roles()
+        else:
+            response = las().construct_response(errors["BadTokenError"])
 
         return response
 
+    @jwt_required()
     def post(self):
-        jwt_token = request.args.get('jwt_token', type=str)
-        json_body = request.json
+        user_email = get_jwt_identity()
 
-        # jwt_token communicates with service to check for valid login session
-
-        response = las().handle_creating_roles(json_body)
+        if las().validate_permission(user_email):
+            json_body = request.json
+            response = las().handle_creating_roles(json_body)
+        else:
+            response = las().construct_response(errors["BadTokenError"])
 
         return response
 
+    @jwt_required()
     def delete(self):
-        jwt_token = request.args.get('jwt_token', type=str)
-        json_body = request.json
+        user_email = get_jwt_identity()
 
-        # jwt_token communicates with service to check for valid login session
-
-        response = las().handle_deleting_role(json_body)
+        if las().validate_permission(user_email):
+            json_body = request.json
+            response = las().handle_deleting_role(json_body)
+        else:
+            response = las().construct_response(errors["BadTokenError"])
 
         return response
