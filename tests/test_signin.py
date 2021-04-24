@@ -63,3 +63,37 @@ class TestSigninResource(BaseTestingSuite):
         
         self.assertEqual("Request is missing required fields.", response.json["message"])
         self.assertEqual(400, response.status_code)
+    
+    def test_successful_token_signin(self):
+        response = self.app.post('/api/auth/signin',
+                                 headers={
+                                     "Content-Type": "application/json"
+                                 },
+                                 data=self.user_payload)
+        
+        response = self.app.post('/api/auth/token',
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     "Authorization": f'Bearer {response.json["jwt_token"]}'
+                                 })
+
+        self.assertEqual('test_user', response.json["full_name"])
+        self.assertEqual(200, response.status_code)
+
+    def test_unsuccessful_token_signin(self):
+        response = self.app.post('/api/auth/token',
+                                 headers={
+                                     "Content-Type": "application/json",
+                                     "Authorization": "Bearer invalidjwt"
+                                 })
+
+        self.assertEqual('Not enough segments', response.json['msg'])
+    
+    def test_missing_jwt_token_signin(self):
+        response = self.app.post('/api/auth/token',
+                                 headers={
+                                     "Content-Type": "application/json"
+                                 })
+        
+        
+        self.assertEqual('Missing Authorization Header', response.json["msg"])

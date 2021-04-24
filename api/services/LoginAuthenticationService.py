@@ -336,7 +336,6 @@ class LoginAuthenticationService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
 
-
     def __update_user_role(self, data):
         try:
             # check if user exists
