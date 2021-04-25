@@ -4,21 +4,21 @@ from tests.TestingSuite import BaseTestingSuite
 
 class TestSigninResource(BaseTestingSuite):
     def setUp(self):
+        print("Testing Signin Resources...")
         super().setUp()
+
         self.user_payload = json.dumps({
             "email": "testuser@test.com",
             "password": "testpasssword",
             "full_name": "test_user"
         })
 
-        # create user
         self.app.post('/api/auth/signup',
                                  headers={
                                      "Content-Type": "application/json"
                                  },
                                  data=self.user_payload)
         
-
     def test_successful_signin(self):
         # create response
         response = self.app.post('/api/auth/signin',
@@ -54,7 +54,6 @@ class TestSigninResource(BaseTestingSuite):
             "email": "testuser@test.com",
         })
 
-        # create response
         response = self.app.post('/api/auth/signin',
                                  headers={
                                      "Content-Type": "application/json"

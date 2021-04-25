@@ -3,6 +3,10 @@ import json
 from tests.TestingSuite import BaseTestingSuite
 
 class TestSignupResource(BaseTestingSuite):
+    def setUp(self):
+        print("Testing Signup Resources...")
+        super().setUp()
+
     def test_successful_signup(self):
         # create payload
         payload = json.dumps({
