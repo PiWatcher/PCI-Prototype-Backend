@@ -338,15 +338,24 @@ class LoginAuthenticationService(BaseService):
 
     def __update_user_role(self, data):
         try:
+            email = data.get('email', None)
+            new_role = data.get('new_role', None)
+
+            if email is None:
+                raise SchemaValidationError
+
+            if new_role is None:
+                raise SchemaValidationError
+
             # check if user exists
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # raise error if user does not exist
             if user is None:
                 raise EmailDoesNotExistError
 
             # check if new role exists
-            role = self.__grab_role(data['new_role'])
+            role = self.__grab_role(new_role)
 
             # raise error if role does not exist
             if role is None:
@@ -354,12 +363,12 @@ class LoginAuthenticationService(BaseService):
 
             # update document with new role
             super().get_database('Users')['users'].update_one(
-                {"email": data['email']},
-                {"$set": {"role": data['new_role']}}
+                {"email": email},
+                {"$set": {"role": new_role}}
             )
 
             # grab updated user
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # check if user
             if user is None:
@@ -375,6 +384,8 @@ class LoginAuthenticationService(BaseService):
                 }
             })
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except EmailDoesNotExistError:
             return super().construct_response(errors["EmailDoesNotExistError"])
         except RoleDoesNotExistError:

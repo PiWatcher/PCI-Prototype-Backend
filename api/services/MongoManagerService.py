@@ -109,7 +109,7 @@ class MongoManagerService(BaseService):
             # attempt to insert entry into database
             super().get_database("Buildings")[building].insert_one(new_entry)
 
-            check_entry = super().get_database("Buildings")[building].find_one(new_entry)
+            check_entry = super().get_database("Buildings")[building].find_one(new_entry, {'_id': 0})
 
             if check_entry is None:
                 raise FailedEntryCreationError
