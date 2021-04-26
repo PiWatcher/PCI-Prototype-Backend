@@ -403,6 +403,12 @@ class LoginAuthenticationService(BaseService):
             if email is None:
                 raise SchemaValidationError
 
+            if password is None:
+                raise SchemaValidationError
+            
+            if new_password is None:
+                raise SchemaValidationError
+
             # search for user in database
             user = self.__grab_user(email)
 
@@ -424,7 +430,7 @@ class LoginAuthenticationService(BaseService):
 
             # update user in database
             super().get_database('Users')['users'].update_one(
-                {"email": data},
+                {"email": email},
                 {"$set": {"password": updated_user.get_password()}}
             )
 

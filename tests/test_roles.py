@@ -4,7 +4,7 @@ from tests.TestingSuite import BaseTestingSuite
 
 class TestRolesResource(BaseTestingSuite):
     def setUp(self):
-        print("Testing Roles Resources...")
+        print("Testing Roles resources...")
         super().setUp()
 
         self.user_payload = json.dumps({

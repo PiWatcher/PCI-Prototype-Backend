@@ -4,7 +4,7 @@ from tests.TestingSuite import BaseTestingSuite
 
 class TestSignupResource(BaseTestingSuite):
     def setUp(self):
-        print("Testing Signup Resources...")
+        print("Testing Signup resources...")
         super().setUp()
 
     def test_successful_signup(self):

@@ -14,7 +14,6 @@ class MongoManagerService(BaseService):
 
     def collect_all_buildings(self):
         try:
-            # database_object = self.mongo["Buildings"]
             buildings = super().get_database("Buildings").list_collection_names()
 
             # construct successful response

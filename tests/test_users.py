@@ -326,3 +326,96 @@ class TestUsersResource(BaseTestingSuite):
 
         self.assertEqual('That role does not exist.', response.json['message'])
         self.assertEqual(400, response.status_code)
+
+    def test_successful_user_password_update(self):
+        test_user_payload = json.dumps({
+            "email": "testuser@test.com",
+            "password": "testpassword",
+            "full_name": "test_user"
+        })
+
+        self.app.post("/api/auth/signup",
+                      headers={
+                          'Content-Type': 'application/json'
+                      },
+                      data=test_user_payload)
+        
+        user_token = self.app.post('/api/auth/signin',
+                                    headers={
+                                        'Content-Type': 'application/json'
+                                    },
+                                    data=test_user_payload).json['jwt_token']
+
+        response = self.app.post('/api/auth/users/update/password',
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'Authorization': f'Bearer {user_token}'
+                                 },
+                                 data=json.dumps({
+                                    'password': 'testpassword',
+                                    'new_password': 'newpassword'
+                                 }))
+
+        self.assertEqual('testuser@test.com password was updated', response.json['description'])
+        self.assertEqual(200, response.status_code)
+
+    def test_bad_schema_error_user_password_update(self):
+        test_user_payload = json.dumps({
+            'email': 'testuser@test.com',
+            'password': 'testpassword',
+            'full_name': 'test_user'
+        })
+
+        self.app.post('/api/auth/signup',
+                      headers={
+                          'Content-Type': 'application/json'
+                      },
+                      data=test_user_payload)
+
+        user_token = self.app.post('/api/auth/signin',
+                                   headers={
+                                       'Content-Type': 'application/json'
+                                   },
+                                   data=test_user_payload).json['jwt_token']
+        
+        response = self.app.post('/api/auth/users/update/password',
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'Authorization': f'Bearer {user_token}'
+                                 },
+                                 data=json.dumps({
+                                     'password': 'testpassword',
+                                     'bad_key': 'badbadbad'
+                                 }))
+
+        self.assertEqual('Request is missing required fields.', response.json['message'])
+        self.assertEqual(400, response.status_code)
+
+    def test_unauthorized_password_user_password_update(self):
+        test_user_payload = json.dumps({
+            'email': 'testuser@test.com',
+            'password': 'testpassword',
+            'full_name': 'test_user'
+        })
+
+        self.app.post('/api/auth/signup',
+                      headers={
+                          'Content-Type': 'application/json'
+                      },
+                      data=test_user_payload)
+
+        user_token = self.app.post('/api/auth/signin',
+                                   headers={
+                                       'Content-Type': 'application/json'
+                                   },
+                                   data=test_user_payload).json['jwt_token']
+        
+        response = self.app.post('/api/auth/users/update/password',
+                                 headers={
+                                     'Content-Type': 'application/json',
+                                     'Authorization': f'Bearer {user_token}'
+                                 },
+                                 data=json.dumps({
+                                     'password': 'wrongpassword',
+                                     'new_password': 'newpassword'
+                                 }))

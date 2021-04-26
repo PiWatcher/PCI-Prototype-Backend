@@ -4,7 +4,7 @@ from tests.TestingSuite import BaseTestingSuite
 
 class TestSigninResource(BaseTestingSuite):
     def setUp(self):
-        print("Testing Signin Resources...")
+        print("Testing Signin resources...")
         super().setUp()
 
         self.user_payload = json.dumps({
