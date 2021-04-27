@@ -7,6 +7,12 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiDataBuildingRoomLive(Resource):
     def get(self):
+        '''
+        Grabs the data for the past hour for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
@@ -15,6 +21,12 @@ class ApiDataBuildingRoomLive(Resource):
 
 class ApiDataBuildingRoomDaily(Resource):
     def get(self):
+        '''
+        Grabs the data for the past day for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
@@ -23,6 +35,12 @@ class ApiDataBuildingRoomDaily(Resource):
 
 class ApiDataBuildingRoomWeekly(Resource):
     def get(self):
+        '''
+        Grabs the data for the past week for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
@@ -31,6 +49,12 @@ class ApiDataBuildingRoomWeekly(Resource):
 
 class ApiDataBuildingRoomMonthly(Resource):
     def get(self):
+        '''
+        Grabs the data for the past month for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
@@ -39,6 +63,12 @@ class ApiDataBuildingRoomMonthly(Resource):
 
 class ApiDataBuildingRoomQuarterly(Resource):
     def get(self):
+        '''
+        Grabs the data for the past quarter for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
@@ -47,6 +77,12 @@ class ApiDataBuildingRoomQuarterly(Resource):
 
 class ApiDataBuildingRoomYearly(Resource):
     def get(self):
+        '''
+        Grabs the data for the past year for a room
+
+        @returns a response object
+        '''
+
         building_name = request.args.get('building_name', type=str)
         room = request.args.get('room', type=str)
 
