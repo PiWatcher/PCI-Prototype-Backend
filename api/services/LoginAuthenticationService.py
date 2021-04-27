@@ -224,14 +224,19 @@ class LoginAuthenticationService(BaseService):
 
     def __signin(self, data):
         try:
-            # check verify login
-            if self.__verify_login(data['email'], data['password']):
-                # grab user from database
-                user = self.__grab_user(data['email'])
+            email = data.get("email", None)
+            password = data.get("password", None)
 
-                # check if user exists
-                if user is None:
-                    raise EmailDoesNotExistError
+            if email is None:
+                raise SchemaValidationError
+
+            if password is None:
+                raise SchemaValidationError
+
+            # check verify login
+            if self.__verify_login(email, password):
+                # grab user from database
+                user = self.__grab_user(email)
 
                 # construct JWT token
                 expires = datetime.timedelta(days=7)
@@ -250,10 +255,10 @@ class LoginAuthenticationService(BaseService):
             else:
                 raise UnauthorizedError
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except UnauthorizedError:
             return super().construct_response(errors["UnauthorizedError"])
-        except EmailDoesNotExistError:
-            return super().construct_response(errors["EmailDoesNotExistError"])
         except (InternalServerError, Exception) as error:
             error_message = errors["InternalServerError"]
             error_message["error"] = f'{error}'
@@ -261,8 +266,21 @@ class LoginAuthenticationService(BaseService):
 
     def __signup(self, data):
         try:
+            email = data.get("email", None)
+            password = data.get("password", None)
+            full_name = data.get("full_name", None)
+
+            if email is None:
+                raise SchemaValidationError
+            
+            if password is None:
+                raise SchemaValidationError
+
+            if full_name is None:
+                raise SchemaValidationError
+
             # check if user exists
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # raise error if user already exists
             if user is not None:
@@ -274,7 +292,7 @@ class LoginAuthenticationService(BaseService):
             )
 
             # check if account in database
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # if user was not created
             if user is None:
@@ -287,6 +305,8 @@ class LoginAuthenticationService(BaseService):
                 'message': f'New {user["role"]} account was created!'
             })
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except EmailAlreadyExistsError:
             return super().construct_response(errors['EmailAlreadyExistsError'])
         except (InternalServerError, Exception) as error:
@@ -316,18 +336,26 @@ class LoginAuthenticationService(BaseService):
             error_message["error"] = f'{error}'
             return super().construct_response(error_message)
 
-
     def __update_user_role(self, data):
         try:
+            email = data.get('email', None)
+            new_role = data.get('new_role', None)
+
+            if email is None:
+                raise SchemaValidationError
+
+            if new_role is None:
+                raise SchemaValidationError
+
             # check if user exists
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # raise error if user does not exist
             if user is None:
                 raise EmailDoesNotExistError
 
             # check if new role exists
-            role = self.__grab_role(data['new_role'])
+            role = self.__grab_role(new_role)
 
             # raise error if role does not exist
             if role is None:
@@ -335,12 +363,12 @@ class LoginAuthenticationService(BaseService):
 
             # update document with new role
             super().get_database('Users')['users'].update_one(
-                {"email": data['email']},
-                {"$set": {"role": data['new_role']}}
+                {"email": email},
+                {"$set": {"role": new_role}}
             )
 
             # grab updated user
-            user = self.__grab_user(data['email'])
+            user = self.__grab_user(email)
 
             # check if user
             if user is None:
@@ -356,6 +384,8 @@ class LoginAuthenticationService(BaseService):
                 }
             })
 
+        except SchemaValidationError:
+            return super().construct_response(errors["SchemaValidationError"])
         except EmailDoesNotExistError:
             return super().construct_response(errors["EmailDoesNotExistError"])
         except RoleDoesNotExistError:
@@ -371,6 +401,12 @@ class LoginAuthenticationService(BaseService):
 
             # validate email is there
             if email is None:
+                raise SchemaValidationError
+
+            if password is None:
+                raise SchemaValidationError
+            
+            if new_password is None:
                 raise SchemaValidationError
 
             # search for user in database
@@ -394,7 +430,7 @@ class LoginAuthenticationService(BaseService):
 
             # update user in database
             super().get_database('Users')['users'].update_one(
-                {"email": data},
+                {"email": email},
                 {"$set": {"password": updated_user.get_password()}}
             )
 

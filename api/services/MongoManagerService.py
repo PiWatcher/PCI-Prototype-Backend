@@ -14,7 +14,6 @@ class MongoManagerService(BaseService):
 
     def collect_all_buildings(self):
         try:
-            # database_object = self.mongo["Buildings"]
             buildings = super().get_database("Buildings").list_collection_names()
 
             # construct successful response
@@ -109,7 +108,7 @@ class MongoManagerService(BaseService):
             # attempt to insert entry into database
             super().get_database("Buildings")[building].insert_one(new_entry)
 
-            check_entry = super().get_database("Buildings")[building].find_one(new_entry)
+            check_entry = super().get_database("Buildings")[building].find_one(new_entry, {'_id': 0})
 
             if check_entry is None:
                 raise FailedEntryCreationError
