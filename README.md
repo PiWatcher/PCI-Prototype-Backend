@@ -104,4 +104,5 @@ You can check if the application is working by going to: localhost:5000/api
 
 ```
 docker system prune -a
+docker volume prune -a # this will delete all data from the mongo database
 ```
