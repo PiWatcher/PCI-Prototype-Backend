@@ -10,7 +10,7 @@ then
     # load prod environment variables
     . .env.prod
     sleep 1
-    docker-compose --env-file .env.prod up -f docker-compose.prod.yml up -d --build
+    docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
     docker exec mongodb-prod mongo -u $ROOT_USER -p $ROOT_PASS --eval "db.getSiblingDB('admin').createUser({user: '$MONGO_USER', pwd: '$MONGO_PASS', roles: ['readWriteAnyDatabase']});"
 fi
 
