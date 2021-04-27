@@ -13,6 +13,12 @@ from api.errors.errors import *
 class MongoManagerService(BaseService):
 
     def collect_all_buildings(self):
+        '''
+        Collects all buildings names from the database
+
+        @returns a response object
+        '''
+
         try:
             buildings = super().get_database("Buildings").list_collection_names()
 
@@ -28,6 +34,14 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def collect_counts_of_buildings(self, building):
+        '''
+        Collects the most recent count from all the rooms in a buildings
+
+        @raises SchemaValidationError if it is missing a required key
+
+        @returns a response object
+        '''
+
         try:
             rooms_and_counts_list = []
             rooms_and_counts = {}
@@ -71,6 +85,14 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def insert_entry_by_room(self, data):
+        '''
+        Inserts an entry into the database
+
+        @raises SchemaValidationError if missing required fields
+
+        @returns a response object
+        '''
+
         try:
             timestamp = data.get("timestamp", None)
             building = data.get("building", None)
@@ -134,10 +156,18 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def mock_data_entry(self, building, iterations=10):
+        '''
+        A helper/debugger function for adding mock entries into the database
+
+        @param building where to insert data entry into
+        @param iterations the number of times to mock data
+
+        @returns a response object
+        '''
 
         for iteration in range(0, iterations):
             response = self.insert_entry_by_room(
-                self.__prepare_mock_data(building, iterations))
+                self.__prepare_mock_data(building))
 
         json_response = {
             'status': 200,
@@ -148,7 +178,16 @@ class MongoManagerService(BaseService):
                         mimetype='application/json',
                         status=json_response['status'])
 
-    def __prepare_mock_data(self, building, iterations):
+    def __prepare_mock_data(self, building):
+        '''
+        A private helper function for preparing mock data
+
+        @param building where to mock data too
+        @param iterations the number of iterations to mock
+
+        @returns a json containing mocked data
+        '''
+        
         data = {}
         random_room = random.randint(100, 150)
         random_endpoint_id = random.randint(1, 4)
@@ -165,6 +204,19 @@ class MongoManagerService(BaseService):
         return data
 
     def __data_segmenter(self, query_filter, upper_limit, time_offset, num_of_endpoints, entry_offset=None, is_live=False):
+        '''
+        Segments the data by the different date ranges to give you an average over time
+
+        @param query_filter query filter that is used to filter through database data
+        @param upper_limits the max number of entries that will be returned
+        @param time_offset time to offset by in minutes
+        @param num_of_endpoints the number of unique endpoints in the room
+        @param entry_offset the number of entries to offset by
+        @param is_live boolean flag to check for live data querying
+
+        @returns a list of segmented data
+        '''
+
         # constants
         DECREASING = -1
         BEGINNING = 0
@@ -210,6 +262,17 @@ class MongoManagerService(BaseService):
         return segmented_data
         
     def get_live_data(self, building, room):
+        '''
+        Grabs segmented data for the past hour
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get live data for
+        @param room the room to get live data for
+
+        @returns a response object
+        '''
+
         try:
             # validate schema
             if building is None:
@@ -264,6 +327,17 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def get_daily_data(self, building, room):
+        '''
+        Grabs segmented data for the past day
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get daily data for
+        @param room the room to get daily data for
+
+        @returns a response object
+        '''
+
         try:
             # Validate schema
             if building is None:
@@ -314,6 +388,17 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def get_weekly_data(self, building, room):
+        '''
+        Grabs segmented data for the past week
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get weekly data for
+        @param room the room to get weekly data for
+
+        @returns a response object
+        '''
+
         try:
             # Validate Schema
             if building is None:
@@ -362,6 +447,17 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def get_monthly_data(self, building, room):
+        '''
+        Grabs segmented data for the past week
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get weekly data for
+        @param room the room to get weekly data for
+
+        @returns a response object
+        '''
+
         try:
             # validate schema
             if building is None:
@@ -411,6 +507,17 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def get_quarterly_data(self, building, room):
+        '''
+        Grabs segmented data for the past quarter
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get quarter data for
+        @param room the room to get quarter data for
+
+        @returns a response object
+        '''
+
         try:
             if building is None:
                 raise SchemaValidationError
@@ -459,6 +566,17 @@ class MongoManagerService(BaseService):
         
         
     def get_yearly_data(self, building, room):
+        '''
+        Grabs segmented data for the past year
+
+        @raises SchemaValidationError if missing required keys
+
+        @param building the building to get year data for
+        @param room the room to get year data for
+
+        @returns a response object
+        '''
+
         try:
             # Validate schema
             if building is None:
@@ -507,6 +625,12 @@ class MongoManagerService(BaseService):
             return super().construct_response(error_message)
 
     def __average_counts_by_time(self, segmented_counts, current_time, time_offset, endpoint_total):
+        '''
+        Averages all the counts in the list into one average count
+
+        @returns a single json containing the averaged count in that date range
+        '''
+
         total_count = 0
         json_time = current_time
         json_time = current_time - timedelta(minutes=time_offset)

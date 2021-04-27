@@ -6,6 +6,12 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiDataIotUpdate(Resource):
     def post(self):
+        '''
+        Adds an entry into the database
+
+        @returns a response object
+        '''
+
         json_body = request.json
         response = mms().insert_entry_by_room(json_body)
         return response

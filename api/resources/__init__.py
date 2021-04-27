@@ -27,10 +27,22 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiBaseResource(Resource):
     def get(self):
+        '''
+        Endpoint to test if the API is functional
+
+        @returns a response object
+        '''
+
         return jsonify({'status': 200, 'message': 'Api base resource has been hit'})
 
 class ApiMockResource(Resource):
     def get(self):
+        '''
+        A developer only endpoint that is used to mock data in the database
+
+        @returns a response object
+        '''
+
         building = request.args.get('building', type=str)
         iterations = request.args.get('iterations', default=10, type=int)
 

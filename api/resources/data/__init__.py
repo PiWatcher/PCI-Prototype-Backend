@@ -6,5 +6,11 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiDataBuildings(Resource):
     def get(self):
+        '''
+        Gets the list of buildings that have entries in the database
+
+        @returns a response object
+        '''
+
         response = mms().collect_all_buildings()
         return response

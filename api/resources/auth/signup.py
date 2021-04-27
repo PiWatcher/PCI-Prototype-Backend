@@ -6,5 +6,11 @@ from api.services.LoginAuthenticationService import LoginAuthenticationService a
 
 class ApiAuthSignup(Resource):
     def post(self):
+        '''
+        Creates a user account
+
+        @returns a response object
+        '''
+
         response = las().handle_signup(request.json)
         return response

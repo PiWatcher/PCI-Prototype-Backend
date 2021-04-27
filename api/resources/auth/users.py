@@ -9,6 +9,12 @@ from api.errors.errors import *
 class ApiAuthUsers(Resource):
     @jwt_required()
     def get(self):
+        '''
+        Gets a list of users from the database
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
@@ -20,6 +26,12 @@ class ApiAuthUsers(Resource):
     
     @jwt_required()
     def delete(self):
+        '''
+        Deletes a user from the database
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
@@ -33,6 +45,12 @@ class ApiAuthUsers(Resource):
 class ApiAuthUsersUpdate(Resource):
     @jwt_required()
     def post(self):
+        '''
+        Updates the role of a user
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
@@ -46,6 +64,12 @@ class ApiAuthUsersUpdate(Resource):
 class ApiAuthUsersUpdatePassword(Resource):
     @jwt_required()
     def post(self):
+        '''
+        Updates the password of a user
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         json_body = request.json
