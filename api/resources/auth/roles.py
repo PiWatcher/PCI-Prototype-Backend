@@ -9,6 +9,12 @@ from api.errors.errors import *
 class ApiAuthRoles(Resource):
     @jwt_required()
     def get(self):
+        '''
+        Gets all roles from the database.
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
@@ -20,6 +26,12 @@ class ApiAuthRoles(Resource):
 
     @jwt_required()
     def post(self):
+        '''
+        Creates a role in the database
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
@@ -32,6 +44,12 @@ class ApiAuthRoles(Resource):
 
     @jwt_required()
     def delete(self):
+        '''
+        Deletes a role from the database
+
+        @returns a response object
+        '''
+
         user_email = get_jwt_identity()
 
         if las().validate_permission(user_email):
