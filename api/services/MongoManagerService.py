@@ -292,14 +292,14 @@ class MongoManagerService(BaseService):
 
             # construct time interval
             current_time = datetime.now()
-            interval = current_time - timedelta(minutes=60)
+            interval = current_time - timedelta(minutes=1440)
 
             # construct query filter
             query_filter = {
-                # "timestamp": {
-                #     "$lte": current_time,
-                #     "$gte": interval
-                # },
+                "timestamp": {
+                    "$lte": current_time,
+                    "$gte": interval
+                },
                 "building": building,
                 "endpoint": room
             }
@@ -308,15 +308,15 @@ class MongoManagerService(BaseService):
             endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            # live_counts = self.__data_segmenter(query_filter,
-            #                                          number_of_entries,
-            #                                          time_offset,
-            #                                          endpoint_total,
-            #                                          is_live=True)
+            live_counts = self.__data_segmenter(query_filter,
+                                                     number_of_entries,
+                                                     time_offset,
+                                                     endpoint_total,
+                                                     is_live=True)
 
-            live_cursor = super().get_database("Buildings")[building].find(query_filter, {'timestamp': 1, 'count': 1})
+            # live_cursor = super().get_database("Buildings")[building].find(query_filter, {'timestamp': 1, 'count': 1})
 
-            live_counts = [entry for entry in live_cursor]
+            # live_counts = [entry for entry in live_cursor]
 
             # construct successful response with data
             return super().construct_response({
