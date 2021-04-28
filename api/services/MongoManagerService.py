@@ -295,8 +295,8 @@ class MongoManagerService(BaseService):
             # construct query filter
             query_filter = {
                 "timestamp": {
-                    "$lte": current_time,
-                    "$gte": interval
+                    "$lte": str(current_time),
+                    "$gte": str(interval)
                 },
                 "building": building,
                 "endpoint": room
