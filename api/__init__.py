@@ -21,6 +21,11 @@ public_role = mongo["Users"]["roles"].find_one({
     'role_name': "public"
 }, {"_id": 0})
 
+# check if default admin is created
+default_admin = mongo["Users"]["users"].find_one({
+    'email': 'iotadmin@nau.edu'
+}, {"_id": 0})
+
 # check if default roles is None
 if admin_role is None:
     mongo["Users"]["roles"].insert_one(
@@ -31,11 +36,6 @@ if public_role is None:
     mongo["Users"]["roles"].insert_one(
         Role("public", False, False).to_json()
     )
-
-# check if default admin is created
-default_admin = mongo["Users"]["users"].find_one({
-    'email': 'iotadmin@nau.edu'
-}, {"_id": 0})
 
 # create if there isn't
 if default_admin is None:
