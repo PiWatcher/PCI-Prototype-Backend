@@ -288,7 +288,7 @@ class MongoManagerService(BaseService):
             # 1/4 w/ 240 == 8 seconds
             # 1/12 w/ 740 == 1 minute 8 seconds
             time_offset = 1/2
-            number_of_entries = 120
+            number_of_entries = 240
 
             # construct time interval
             current_time = datetime.now()
