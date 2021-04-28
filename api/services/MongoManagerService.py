@@ -643,7 +643,7 @@ class MongoManagerService(BaseService):
 
             total_avg_count = math.floor(total_count / len(segmented_counts))
 
-        count_json = {'timestamp': json_time.isoformat(),
+        count_json = {'timestamp': json_time,
                       'count': total_avg_count}
 
         return count_json
