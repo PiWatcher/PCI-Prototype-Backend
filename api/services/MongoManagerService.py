@@ -296,10 +296,10 @@ class MongoManagerService(BaseService):
 
             # construct query filter
             query_filter = {
-                # "timestamp": {
-                #     "$lte": current_time,
-                #     "$gte": interval
-                # },
+                "timestamp": {
+                    "$lte": current_time,
+                    "$gte": interval
+                },
                 "building": building,
                 "endpoint": room
             }
@@ -643,7 +643,7 @@ class MongoManagerService(BaseService):
             for count in segmented_counts:
                 total_count += count
 
-            total_avg_count = math.floor(total_count / len(segmented_counts))
+            total_avg_count = math.ceil(total_count / len(segmented_counts))
 
         count_json = {'timestamp': json_time,
                       'count': total_avg_count}
