@@ -292,7 +292,7 @@ class MongoManagerService(BaseService):
 
             # construct time interval
             current_time = datetime.now()
-            interval = current_time - timedelta(minutes=1440)
+            interval = current_time - timedelta(hours=1)
 
             # construct query filter
             query_filter = {
@@ -313,10 +313,6 @@ class MongoManagerService(BaseService):
                                                      time_offset,
                                                      endpoint_total,
                                                      is_live=True)
-
-            # live_cursor = super().get_database("Buildings")[building].find(query_filter, {'timestamp': 1, 'count': 1})
-
-            # live_counts = [entry for entry in live_cursor]
 
             # construct successful response with data
             return super().construct_response({
