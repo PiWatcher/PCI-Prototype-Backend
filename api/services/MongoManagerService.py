@@ -295,8 +295,8 @@ class MongoManagerService(BaseService):
             # construct query filter
             query_filter = {
                 "timestamp": {
-                    "$lte": current_time,
-                    "$gte": interval
+                    "$lte": current_time.isoformat(),
+                    "$gte": interval.isoformat()
                 },
                 "building": building,
                 "endpoint": room
@@ -356,8 +356,8 @@ class MongoManagerService(BaseService):
             # construct query filter
             query_filter = {
                 "timestamp": {
-                    "$lte": current_time,
-                    "$gte": interval
+                    "$lte": current_time.isoformat(),
+                    "$gte": interval.isoformat()
                 },
                 "building": building,
                 "endpoint": room
@@ -415,8 +415,8 @@ class MongoManagerService(BaseService):
 
             query_filter = {
                 'timestamp': {
-                    '$lte': current_time,
-                    '$gte': interval
+                    '$lte': current_time.isoformat(),
+                    '$gte': interval.isoformat()
                 },
                 'building': building,
                 'endpoint': room
@@ -475,8 +475,8 @@ class MongoManagerService(BaseService):
 
             query_filter = {
                 'timestamp': {
-                    '$lte': current_time,
-                    '$gte': interval
+                    '$lte': current_time.isoformat(),
+                    '$gte': interval.isoformat()
                 },
                 'building': building,
                 'endpoint': room
@@ -533,8 +533,8 @@ class MongoManagerService(BaseService):
 
             query_filter = {
                 'timestamp': {
-                    '$lte': current_time,
-                    '$gte': interval
+                    '$lte': current_time.isoformat(),
+                    '$gte': interval.isoformat(0)
                 },
                 'building': building,
                 'endpoint': room
@@ -593,8 +593,8 @@ class MongoManagerService(BaseService):
 
             query_filter = {
                 'timestamp': {
-                    '$lte': current_time,
-                    '$gte': interval
+                    '$lte': current_time.isoformat(),
+                    '$gte': interval.isoformat()
                 },
                 'building': building,
                 'endpoint': room
@@ -643,7 +643,7 @@ class MongoManagerService(BaseService):
 
             total_avg_count = math.floor(total_count / len(segmented_counts))
 
-        count_json = {'timestamp': json_time,
+        count_json = {'timestamp': json_time.isoformat(),
                       'count': total_avg_count}
 
         return count_json
