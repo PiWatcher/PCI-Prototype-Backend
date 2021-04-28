@@ -5,6 +5,7 @@ import config
 from api import api
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 # setting up logging basic config
 logging.basicConfig(level=logging.DEBUG,
@@ -27,11 +28,15 @@ def create_app():
     logger.info(f'Initializing cross-origin resource sharing')
     CORS(app)
 
+    logger.info(f'Initializing JWT manager')
+    jwt = JWTManager(app)
+
     logger.info(f'Initializing PCI-REST API backend')
     api.init_app(app)
 
     return app
 
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
     app.run(host=config.BASE_URL, port=config.PORT)
