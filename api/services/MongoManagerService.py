@@ -118,8 +118,10 @@ class MongoManagerService(BaseService):
             if room_capacity is None:
                 raise SchemaValidationError
 
+            timestamp_obj = datetime.strptime(timestamp)
+
             # create new entry
-            new_entry = Entry(timestamp,
+            new_entry = Entry(timestamp_obj,
                               building,
                               building_id,
                               count,
@@ -137,7 +139,7 @@ class MongoManagerService(BaseService):
 
             return super().construct_response({
                 'status': 200,
-                'timestamp': timestamp,
+                'timestamp': timestamp_obj,
                 'message': f"New entry was added successfully {check_entry}"
             })
 
@@ -193,7 +195,7 @@ class MongoManagerService(BaseService):
         random_endpoint_id = random.randint(1, 4)
         random_count = random.randint(1, 50)
 
-        data['timestamp'] = str(datetime.now())
+        data['timestamp'] = datetime.now()
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
