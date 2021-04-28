@@ -139,8 +139,8 @@ class MongoManagerService(BaseService):
 
             return super().construct_response({
                 'status': 200,
-                'timestamp': timestamp_obj,
-                'message': f"New entry was added successfully {check_entry}"
+                'timestamp': timestamp,
+                'message': f"New entry was added successfully {check_entry['count']}"
             })
 
         # Schema Validation Error
@@ -195,7 +195,7 @@ class MongoManagerService(BaseService):
         random_endpoint_id = random.randint(1, 4)
         random_count = random.randint(1, 50)
 
-        data['timestamp'] = datetime.now()
+        data['timestamp'] = str(datetime.now())
         data['building'] = building.capitalize()
         data['building_id'] = 1
         data['count'] = random_count
@@ -287,8 +287,8 @@ class MongoManagerService(BaseService):
             # 1/2 w/ 120 == 120ms
             # 1/4 w/ 240 == 8 seconds
             # 1/12 w/ 740 == 1 minute 8 seconds
-            time_offset = 1/12
-            number_of_entries = 740
+            time_offset = 1/2
+            number_of_entries = 120
 
             # construct time interval
             current_time = datetime.now()
@@ -296,10 +296,10 @@ class MongoManagerService(BaseService):
 
             # construct query filter
             query_filter = {
-                "timestamp": {
-                    "$lte": current_time,
-                    "$gte": interval
-                },
+                # "timestamp": {
+                #     "$lte": current_time,
+                #     "$gte": interval
+                # },
                 "building": building,
                 "endpoint": room
             }
