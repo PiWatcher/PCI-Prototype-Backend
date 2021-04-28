@@ -308,11 +308,15 @@ class MongoManagerService(BaseService):
             endpoint_total = len(super().get_database("Buildings")[building].distinct('endpoint_id', query_filter))
 
             # grab averaged counts
-            live_counts = self.__data_segmenter(query_filter,
-                                                     number_of_entries,
-                                                     time_offset,
-                                                     endpoint_total,
-                                                     is_live=True)
+            # live_counts = self.__data_segmenter(query_filter,
+            #                                          number_of_entries,
+            #                                          time_offset,
+            #                                          endpoint_total,
+            #                                          is_live=True)
+
+            live_cursor = super().get_database("Buildings")[building].find(query_filter, {'timestamp': 1, 'count': 1})
+
+            live_counts = [entry for entry in live_cursor]
 
             # construct successful response with data
             return super().construct_response({
