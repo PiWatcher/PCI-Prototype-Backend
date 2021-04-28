@@ -118,7 +118,7 @@ class MongoManagerService(BaseService):
             if room_capacity is None:
                 raise SchemaValidationError
 
-            timestamp_obj = datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S.%f')
+            timestamp_obj = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
 
             # create new entry
             new_entry = Entry(timestamp_obj,
