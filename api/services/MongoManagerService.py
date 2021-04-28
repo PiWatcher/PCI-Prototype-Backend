@@ -292,7 +292,7 @@ class MongoManagerService(BaseService):
 
             # construct time interval
             current_time = datetime.now()
-            interval = current_time - timedelta(hours=1)
+            interval = current_time - timedelta(hours=2)
 
             # construct query filter
             query_filter = {
