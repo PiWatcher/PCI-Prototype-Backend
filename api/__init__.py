@@ -15,16 +15,16 @@ mongo = MongoClient(config.MONGODB_URI)
 # attempt to grab admin and public roles
 admin_role = mongo["Users"]["roles"].find_one({
     'role_name': "admin"
-}, {"_id": 0})
+})
 
 public_role = mongo["Users"]["roles"].find_one({
     'role_name': "public"
-}, {"_id": 0})
+})
 
 # check if default admin is created
 default_admin = mongo["Users"]["users"].find_one({
     'email': 'iotadmin@nau.edu'
-}, {"_id": 0})
+})
 
 # check if default roles is None
 if admin_role is None:

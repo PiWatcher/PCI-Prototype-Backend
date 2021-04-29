@@ -11,7 +11,7 @@ class TestIotUpdateResource(BaseTestingSuite):
 
     def test_successful_iot_entry(self):
         new_entry = {
-            'timestamp': str(datetime.datetime.now()),
+            'timestamp': datetime.datetime.now().isoformat(),
             'building': "test building",
             'building_id': "test id",
             'count': 10,
@@ -27,12 +27,12 @@ class TestIotUpdateResource(BaseTestingSuite):
                                 data=json.dumps(new_entry,
                                                 default=json_util.default))
 
-        self.assertEqual(f'New entry was added successfully {new_entry}', response.json['message'])
+        self.assertEqual(f'New entry was added successfully {new_entry["count"]}', response.json['message'])
         self.assertEqual(200, response.status_code)
 
     def test_bad_schema_error(self):
         new_entry = {
-            'timestamp': str(datetime.datetime.now()),
+            'timestamp': datetime.datetime.now().isoformat(),
             'building': "test building",
             # 'building_id': "test id",
             'count': 10,
